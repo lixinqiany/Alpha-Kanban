@@ -1,0 +1,35 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# 顶级配置文件
+root = true
+
+# 所有文件的默认配置
+[*]
+charset = utf-8                  # 字符编码：UTF-8
+end_of_line = lf                 # 换行符：LF
+insert_final_newline = true      # 文件末尾插入空行
+trim_trailing_whitespace = true  # 删除行尾空格
+
+# Go 文件
+[*.go]
+indent_style = tab               # 使用 Tab 缩进（Go 官方标准）
+indent_size = 4
+
+# JavaScript/TypeScript
+[*.{js,ts,tsx,vue}]
+indent_style = space             # 使用空格缩进
+indent_size = 2                  # 2 个空格
+
+# JSON/YAML
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false # Markdown 需要行尾空格表示换行
