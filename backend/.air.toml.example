@@ -1,0 +1,100 @@
+#:schema https://json.schemastore.org/any.json
+
+# 环境变量文件列表 (如 [".env", ".env.local"])
+env_files = []
+
+# 项目根目录
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  args_bin = []
+  # Windows 配置: tmp\\main.exe (使用反斜杠和 .exe 后缀)
+  # Mac/Linux 配置: tmp/main (使用正斜杠，无 .exe 后缀)
+  bin = "tmp\\main.exe"
+
+  # Windows 配置: go build -o ./tmp/main.exe .
+  # Mac/Linux 配置: go build -o ./tmp/main .
+  cmd = "go build -o ./tmp/main.exe ."
+
+  # 文件变化后延迟多久触发重新编译 (毫秒)
+  delay = 1000
+
+  # Windows 配置: ["tmp\\main.exe"]
+  # Mac/Linux 配置: ["tmp/main"]
+  entrypoint = ["tmp\\main.exe"]
+
+  # 排除不需要监控的目录
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_file = []
+
+  # 排除匹配正则表达式的文件 (如测试文件)
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = false
+  follow_symlink = false
+  full_bin = ""
+  ignore_dangerous_root_dir = false
+  include_dir = []
+
+  # 监控的文件扩展名，只有这些类型的文件变化才会触发重新编译
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_file = []
+
+  # 杀死旧进程前等待的时间
+  kill_delay = "0s"
+
+  # 构建错误日志文件
+  log = "build-errors.log"
+  poll = false
+  poll_interval = 0
+
+  # 编译后执行的命令 (可用于数据库迁移等)
+  post_cmd = []
+
+  # 编译前执行的命令 (可用于代码生成、格式化等)
+  pre_cmd = []
+  rerun = false
+
+  # 重新运行前的延迟 (毫秒)
+  rerun_delay = 500
+  send_interrupt = false
+
+  # 编译出错时是否停止监控
+  stop_on_error = false
+
+[color]
+  # 终端输出颜色配置
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[log]
+  # 是否只显示主程序输出 (隐藏 Air 的日志)
+  main_only = false
+
+  # 是否完全静默 Air 的输出
+  silent = false
+
+  # 是否在日志中显示时间戳
+  time = true
+
+[misc]
+  # 退出时是否清理临时文件
+  clean_on_exit = false
+
+[proxy]
+  # Air 代理功能 (可在不改变端口的情况下重启应用)
+  app_port = 0
+  app_start_timeout = 0
+  enabled = false
+  proxy_port = 0
+
+[screen]
+  # 重新编译时是否清空屏幕
+  clear_on_rebuild = false
+
+  # 是否保持滚动位置
+  keep_scroll = true
