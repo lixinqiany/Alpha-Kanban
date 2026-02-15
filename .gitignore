@@ -7,3 +7,7 @@ logs/
 
 *.toml
 tmp/
+
+__pycache__/
+.claude/
+.vscode/
