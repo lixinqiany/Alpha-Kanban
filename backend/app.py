@@ -1,0 +1,24 @@
+import sys
+from fastapi import FastAPI
+from loguru import logger
+from config.environment import Environment
+from config.lifecycle import LifeSpan
+from config.redis import redis_manager
+
+env = Environment()
+# 在 lifespan 初始化前配置日志级别，因为 lifespan 也需要使用 logger
+# 如果在 lifespan 初始化后配置，在不使用lifespan的情况下就无法正确初始化日志系统
+logger.remove()
+logger.add(sys.stderr, level=env.log_level)
+
+# redis 连接参数配置
+redis_manager.setup(env.redis_configuration)
+
+# FastAPI 生命周期管理注册
+lifespan = LifeSpan()
+lifespan.register(redis_manager)
+app = FastAPI(lifespan=lifespan)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=env.port, reload=True)
