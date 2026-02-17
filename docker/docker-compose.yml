@@ -1,0 +1,43 @@
+name: alpha-kanban
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: alpha-kanban-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: alpha_kanban
+      POSTGRES_PASSWORD: alpha_kanban_dev
+      POSTGRES_DB: alpha_kanban
+      TZ: Asia/Shanghai
+
+    ports:
+      - 5432:5432
+
+    # volumes: 数据持久化挂载
+    # 容器删除后数据默认会丢失，通过 volume 可以将数据保存到宿主机
+    # 格式: 卷名:容器内路径
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # healthcheck: 健康检查，让 Docker 知道服务是否真正"可用"
+    # 其他依赖此服务的容器可以通过 depends_on.condition 等待它健康
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alpha_kanban"]
+      interval: 30s    # 每隔多久检查一次
+      timeout: 5s      # 单次检查超时时间
+      retries: 5       # 连续失败几次判定为 unhealthy
+      start_period: 60s # 容器启动后多久开始检查（给服务预热时间）
+
+    networks:
+      - alpha-kanban-net
+
+volumes:
+  postgres_data:
+    name: alpha-kanban-postgres-data
+
+networks:
+  alpha-kanban-net:
+    name: alpha-kanban-net
+    driver: bridge
