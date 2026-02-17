@@ -5,6 +5,14 @@ from typing import TypedDict, Literal, NotRequired
 
 LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
+class PostgresConfiguration(TypedDict):
+    host: str
+    port: int
+    user: str
+    password: str
+    database: str
+
+
 class RedisConfiguration(TypedDict):
     mode: Literal["STANDALONE", "SENTINEL"]
 
@@ -35,7 +43,7 @@ class Environment:
     def port(self) -> int:
         return int(os.getenv("PORT", "8000"))
 
-    def _parse_sentinel_hosts(hosts_str: str) -> list[tuple[str, int]]:
+    def _parse_sentinel_hosts(self, hosts_str: str) -> list[tuple[str, int]]:
         sentinels: list[tuple[str, int]] = []
         for item in hosts_str.split(","):
             item = item.strip()
@@ -60,6 +68,19 @@ class Environment:
             raise ValueError(f"不支持的 LOG_LEVEL: {level}")
 
         return level
+
+    @property
+    def postgres_configuration(self) -> PostgresConfiguration:
+        if not self.isLoaded:
+            raise RuntimeError("环境变量未加载")
+
+        return PostgresConfiguration(
+            host=os.getenv("POSTGRES_HOST", "localhost"),
+            port=int(os.getenv("POSTGRES_PORT", "5432")),
+            user=os.getenv("POSTGRES_USER", "alpha_kanban"),
+            password=os.getenv("POSTGRES_PASSWORD", "alpha_kanban_dev"),
+            database=os.getenv("POSTGRES_DB", "alpha_kanban"),
+        )
 
     @property
     def redis_configuration(self) -> RedisConfiguration:

@@ -4,6 +4,7 @@ from loguru import logger
 from config.environment import Environment
 from config.lifecycle import LifeSpan
 from config.redis import redis_manager
+from config.postgres import postgres_manager
 
 env = Environment()
 # 在 lifespan 初始化前配置日志级别，因为 lifespan 也需要使用 logger
@@ -11,11 +12,13 @@ env = Environment()
 logger.remove()
 logger.add(sys.stderr, level=env.log_level)
 
-# redis 连接参数配置
+# 连接参数配置
 redis_manager.setup(env.redis_configuration)
+postgres_manager.setup(env.postgres_configuration)
 
 # FastAPI 生命周期管理注册
 lifespan = LifeSpan()
+lifespan.register(postgres_manager)
 lifespan.register(redis_manager)
 app = FastAPI(lifespan=lifespan)
 
