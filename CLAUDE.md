@@ -28,11 +28,29 @@ No test framework is configured yet.
 
 **Backend** (`backend/`): FastAPI async application using SQLAlchemy 2.0 (async) with asyncpg for PostgreSQL and redis.asyncio for Redis.
 
-**Lifecycle management pattern**: Services (Redis, Postgres) implement a `Manageable` abstract interface (`start()`/`close()` methods) and register with a `LifeSpan` context manager that handles startup/shutdown via FastAPI's lifespan. Singletons `redis_manager` and `postgres_manager` are module-level instances.
+### Directory Structure
 
-**Configuration**: `Environment` class in `config/environment.py` loads from `.env` files. Typed configuration dicts (`PostgresConfiguration`, `RedisConfiguration`) are used throughout. Redis supports both STANDALONE and SENTINEL modes.
+```
+backend/
+├── app.py                 # 入口，创建 FastAPI 实例并注册 lifespan 和路由
+├── config/                # 配置与基础设施
+│   ├── environment.py     # Environment 类，从 .env 加载配置
+│   ├── lifecycle/         # Manageable 抽象接口 + LifeSpan 上下文管理器
+│   ├── postgres.py        # PostgreSQL 连接管理（postgres_manager 单例）
+│   └── redis.py           # Redis 连接管理（redis_manager 单例）
+├── models/                # SQLAlchemy ORM 表定义（集中管理，处理外键依赖）
+└── modules/               # 按业务域组织的功能模块
+    └── <模块1>/              # 卡片
+        ├── router.py
+        ├── service.py
+        └── schema.py
+```
 
-**Key entry point**: `backend/app.py` creates the FastAPI app and wires up the lifespan. No API routes or SQLAlchemy models are defined yet.
+### Key Patterns
+
+- **Lifecycle management**: Services (Redis, Postgres) implement `Manageable` abstract interface (`start()`/`close()`) and register with `LifeSpan` context manager via FastAPI's lifespan. `redis_manager` and `postgres_manager` are module-level singletons.
+- **Configuration**: `Environment` class loads from `.env` files. Typed configuration dicts (`PostgresConfiguration`, `RedisConfiguration`) are used throughout. Redis supports STANDALONE and SENTINEL modes.
+- **Module convention**: Each business module under `modules/` contains `router.py`（路由）、`service.py`（业务逻辑）、`schema.py`（数据校验）。Models 集中放在 `models/` 目录下。
 
 ## Code Style
 
