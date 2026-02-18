@@ -33,9 +33,36 @@ services:
     networks:
       - alpha-kanban-net
 
+  redis:
+    image: redis:7.4.7-alpine
+    container_name: alpha-kanban-redis
+    restart: unless-stopped
+
+    environment:
+      TZ: Asia/Shanghai
+
+    ports:
+      - 6379:6379
+
+    volumes:
+      - redis_data:/data
+
+    # healthcheck: 健康检查
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+    networks:
+      - alpha-kanban-net
+
 volumes:
   postgres_data:
     name: alpha-kanban-postgres-data
+  redis_data:
+    name: alpha-kanban-redis-data
 
 networks:
   alpha-kanban-net:
