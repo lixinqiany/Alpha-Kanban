@@ -29,6 +29,12 @@ class RedisConfiguration(TypedDict):
     sentinel_password: NotRequired[str | None]
 
 
+class JWTConfiguration(TypedDict):
+    secret: str
+    access_token_expire_minutes: int
+    refresh_token_expire_days: int
+
+
 class Environment:
     def __init__(self):
         self.env_path = find_dotenv()
@@ -113,6 +119,21 @@ class Environment:
             config["sentinel_password"] = os.getenv("REDIS_SENTINEL_PASSWORD")
 
         return config
+
+    @property
+    def jwt_configuration(self) -> JWTConfiguration:
+        if not self.isLoaded:
+            raise RuntimeError("环境变量未加载")
+
+        secret = os.getenv("JWT_SECRET")
+        if not secret:
+            raise ValueError("JWT_SECRET 未配置，请在 .env 中设置")
+
+        return JWTConfiguration(
+            secret=secret,
+            access_token_expire_minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15")),
+            refresh_token_expire_days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")),
+        )
 
 
 if __name__ == "__main__":
