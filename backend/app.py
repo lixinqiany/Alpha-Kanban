@@ -7,6 +7,7 @@ from config.redis import redis_manager
 from config.postgres import postgres_manager
 # 注册业务路由
 from modules.user.router import router as user_router
+from modules.provider_management.router import router as provider_management_router
 
 env = Environment()
 # 在 lifespan 初始化前配置日志级别，因为 lifespan 也需要使用 logger
@@ -25,6 +26,7 @@ lifespan.register(redis_manager)
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(user_router)
+app.include_router(provider_management_router)
 
 if __name__ == "__main__":
     import uvicorn
