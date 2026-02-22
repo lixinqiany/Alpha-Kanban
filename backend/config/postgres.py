@@ -46,7 +46,7 @@ class PostgresManager(Manageable):
 
         self._engine = create_async_engine(
             url,
-            echo=True,  # 设为 True 可打印所有 SQL（调试用）
+            echo=False,
         )
 
         self._session_factory = async_sessionmaker(

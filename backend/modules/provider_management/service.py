@@ -41,7 +41,7 @@ async def create_provider(session: AsyncSession, data: ProviderCreateRequest) ->
     provider = Provider(
         name=data.name,
         api_key=data.api_key,
-        base_url=data.base_url,
+        base_url=str(data.base_url),
         is_enabled=data.is_enabled,
     )
     session.add(provider)
@@ -65,6 +65,8 @@ async def update_provider(
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        if field == "base_url" and value is not None:
+            value = str(value)
         setattr(provider, field, value)
 
     await session.commit()
