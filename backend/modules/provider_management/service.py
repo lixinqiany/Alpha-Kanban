@@ -11,15 +11,15 @@ from modules.provider_management.schema import (
     ModelCreateRequest,
     ModelUpdateRequest,
 )
+from utils.pagination import paginate, PaginatedResponse
 
 
 # ── Provider CRUD ──
 
-async def list_providers(session: AsyncSession) -> list[Provider]:
-    """查询所有供应商"""
-    # 降序 = 从新到旧
-    result = await session.execute(select(Provider).order_by(Provider.updated_at.desc()))
-    return list(result.scalars().all())
+async def list_providers(session: AsyncSession, page: int = 1, page_size: int = 10) -> PaginatedResponse:
+    """分页查询供应商列表"""
+    query = select(Provider).order_by(Provider.updated_at.desc())
+    return await paginate(session, query, page, page_size)
 
 
 async def get_provider(session: AsyncSession, provider_id: uuid.UUID) -> Provider:
@@ -83,14 +83,12 @@ async def delete_provider(session: AsyncSession, provider_id: uuid.UUID) -> None
 
 # ── Model CRUD ──
 
-async def list_models(session: AsyncSession, provider_id: uuid.UUID) -> list[Model]:
-    """查询某供应商下所有模型"""
+async def list_models(session: AsyncSession, provider_id: uuid.UUID, page: int = 1, page_size: int = 10) -> PaginatedResponse:
+    """分页查询某供应商下的模型"""
     # 先确认供应商存在
     await get_provider(session, provider_id)
-    result = await session.execute(
-        select(Model).where(Model.provider_id == provider_id).order_by(Model.created_at.desc())
-    )
-    return list(result.scalars().all())
+    query = select(Model).where(Model.provider_id == provider_id).order_by(Model.created_at.desc())
+    return await paginate(session, query, page, page_size)
 
 
 async def create_model(

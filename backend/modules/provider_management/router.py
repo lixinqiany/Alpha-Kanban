@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
@@ -15,6 +15,7 @@ from modules.provider_management.schema import (
     ModelUpdateRequest,
     ModelResponse,
 )
+from utils.pagination import PaginatedResponse
 from modules.provider_management.service import (
     list_providers,
     get_provider,
@@ -36,11 +37,13 @@ router = APIRouter(
 
 # ── Provider 路由 ──
 
-@router.get("/providers", response_model=list[ProviderResponse])
+@router.get("/providers", response_model=PaginatedResponse[ProviderResponse])
 async def api_list_providers(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_postgres_session),
 ):
-    return await list_providers(session)
+    return await list_providers(session, page, page_size)
 
 
 @router.get("/providers/{provider_id}", response_model=ProviderResponse)
@@ -83,12 +86,14 @@ async def api_delete_provider(
 
 # ── Model 路由 ──
 
-@router.get("/providers/{provider_id}/models", response_model=list[ModelResponse])
+@router.get("/providers/{provider_id}/models", response_model=PaginatedResponse[ModelResponse])
 async def api_list_models(
     provider_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_postgres_session),
 ):
-    return await list_models(session, provider_id)
+    return await list_models(session, provider_id, page, page_size)
 
 
 @router.post("/providers/{provider_id}/models", response_model=ModelResponse, status_code=201)
