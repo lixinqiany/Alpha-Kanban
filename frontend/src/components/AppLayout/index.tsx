@@ -1,6 +1,7 @@
-import { defineComponent, ref, onMounted, onUnmounted } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { RouterView, RouterLink, useRouter, useRoute } from 'vue-router'
 import { getCurrentUser, isAdmin } from '../../utils/token'
+import Dropdown from '../Dropdown'
 import styles from './AppLayout.module.css'
 
 interface TabItem {
@@ -12,30 +13,10 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const showDropdown = ref(false)
-    const dropdownRef = ref<HTMLElement | null>(null)
     const showSidebar = ref(false)
 
     const user = getCurrentUser()
     const initial = user?.sub?.charAt(0)?.toUpperCase() || '?'
-
-    function toggleDropdown() {
-      showDropdown.value = !showDropdown.value
-    }
-
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
-        showDropdown.value = false
-      }
-    }
-
-    onMounted(() => {
-      document.addEventListener('click', handleClickOutside, true)
-    })
-
-    onUnmounted(() => {
-      document.removeEventListener('click', handleClickOutside, true)
-    })
 
     function handleSignOut() {
       localStorage.removeItem('access_token')
@@ -44,7 +25,6 @@ export default defineComponent({
     }
 
     function handleAdmin() {
-      showDropdown.value = false
       router.push({ name: 'AdminProviderManagement' })
     }
 
@@ -120,23 +100,29 @@ export default defineComponent({
               </RouterLink>
             </div>
 
-            <div class={styles.navRight} ref={dropdownRef}>
-              <button class={styles.avatarBtn} onClick={toggleDropdown}>
-                {initial}
-              </button>
-              {showDropdown.value && (
-                <div class={styles.dropdown}>
-                  <div class={styles.dropdownHeader}>{user?.sub || 'User'}</div>
-                  <div class={styles.dropdownDivider}></div>
-                  {isAdmin() && (
+            <div class={styles.navRight}>
+              <Dropdown placement="bottom-right">
+                {{
+                  trigger: () => (
+                    <button class={styles.avatarBtn}>
+                      {initial}
+                    </button>
+                  ),
+                  default: () => (
                     <>
-                      <button class={styles.dropdownItem} onClick={handleAdmin}>Admin</button>
+                      <div class={styles.dropdownHeader}>{user?.sub || 'User'}</div>
                       <div class={styles.dropdownDivider}></div>
+                      {isAdmin() && (
+                        <>
+                          <button class={styles.dropdownItem} onClick={handleAdmin}>Admin</button>
+                          <div class={styles.dropdownDivider}></div>
+                        </>
+                      )}
+                      <button class={styles.dropdownItem} onClick={handleSignOut}>Sign out</button>
                     </>
-                  )}
-                  <button class={styles.dropdownItem} onClick={handleSignOut}>Sign out</button>
-                </div>
-              )}
+                  ),
+                }}
+              </Dropdown>
             </div>
           </nav>
 
