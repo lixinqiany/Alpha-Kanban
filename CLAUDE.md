@@ -49,9 +49,21 @@ backend/
 
 frontend/src/
 ├── api/               # Axios 实例与拦截器（client.ts）+ 各业务域接口（<xxx>.ts）
+├── assets/icons/      # SVG 图标资源
 ├── components/        # 全局通用组件，每个组件同名文件夹 + index.tsx 入口
+│   ├── AdminLayout/   # 管理后台侧边栏布局
+│   ├── AppLayout/     # 主应用布局（导航栏 + 侧边栏 + 用户下拉菜单）
+│   ├── AuthLayout/    # 认证页面居中表单布局
+│   ├── DataTable/     # 分页数据表格（可自定义列、分页控件、加载状态）
+│   ├── Dropdown/      # 下拉菜单（支持四方向定位、点击外部关闭）
+│   ├── FeatureCard/   # 功能卡片展示（图标 + 标题 + 描述 + 标签）
+│   └── SvgIcon/       # SVG 图标封装（尺寸、颜色可定制）
+├── utils/             # 工具函数（token.ts：JWT 解析、用户信息、角色判断）
 ├── views/             # 页面视图，按功能分组
-└── router/            # Vue Router 路由定义
+│   ├── auth/          # 登录 / 注册
+│   ├── home/          # 首页仪表盘（概览 + 活动）
+│   └── provider/      # 供应商 / 模型管理
+└── router/            # Vue Router 路由定义 + 导航守卫
 ```
 
 ## Data Models
@@ -106,26 +118,31 @@ PUT|DELETE /api/provider-management/models/{model_id}
 
 ## Frontend Routes
 
-| 路径 | 组件 | 说明 |
-|------|------|------|
-| `/login` | LoginView | 登录 |
-| `/register` | RegisterView | 注册 |
-| `/providers` | ProviderListView | 供应商列表 |
-| `/providers/:id/models` | ProviderModelsView | 模型列表 |
-| `/` | — | 重定向到 `/login` |
+```
+/ → 重定向到 /login（未登录）或 /home（已登录）
+├── /login                    LoginView         （公开，已登录则跳转 /home）
+├── /register                 RegisterView      （公开，已登录则跳转 /home）
+└── / [AppLayout]                                （需登录，导航守卫校验 token）
+    ├── /home [HomeView]                         （Tab 切换子路由）
+    │   ├── /                 OverviewContent    （默认 Tab：功能概览卡片）
+    │   └── /activity         ActivityContent    （活动记录，占位中）
+    └── /admin [AdminLayout]                     （管理后台侧边栏布局）
+        ├── /providers        ProviderListView   （供应商 CRUD + 分页）
+        └── /providers/:id/models ProviderModelsView（模型 CRUD + 分页）
+```
+
+命名路由：`Login` / `Register` / `Home` / `HomeActivity` / `AdminProviderManagement` / `AdminProviderModelManagement`
 
 ## Utils
 
-### 分页 — `utils/pagination.py`
+### 后端
 
-`PaginatedResponse[T]` 泛型 Pydantic 模型 + `paginate()` 异步函数，接受 SQLAlchemy Select 查询，自动计数和分页返回。
+- **分页** — `utils/pagination.py`：`PaginatedResponse[T]` 泛型模型 + `paginate()` 异步函数
+- **JWT** — `config/auth.py`：`create_access_token` / `create_refresh_token` / `decode_token` / `make_refresh_key`
 
-### JWT 工具 — `config/auth.py`
+### 前端
 
-- `create_access_token(config, user_id, role)` — 生成 access token，payload 含 `sub` + `role`
-- `create_refresh_token(config, user_id)` — 生成 refresh token，payload 含 `jti`
-- `decode_token(config, token)` — 解码验证令牌
-- `make_refresh_key(user_id, jti)` — Redis 键名生成
+- **Token 工具** — `utils/token.ts`：`parseToken(token)` 解析 JWT payload，`getCurrentUser()` 获取当前用户信息，`isAdmin()` 判断管理员角色
 
 ## 开发约定
 
@@ -156,10 +173,12 @@ PUT|DELETE /api/provider-management/models/{model_id}
 
 - TSX + `defineComponent` + `setup()`，CSS Modules 样式隔离
 - `components/` 每个组件同名文件夹，`index.tsx` 作为入口
+- 布局层级：`AppLayout`（主框架）→ 页面 / `AdminLayout`（管理后台）→ 子页面
 - `api/client.ts` 提供 `publicClient`（无鉴权）和 `authClient`（自动注入 Bearer Token + 401 静默刷新）
-- `api/<domain>.ts` 封装业务接口 + TS 类型定义
+- `api/<domain>.ts` 封装业务接口 + TS 类型定义（当前：`user.ts`、`provider.ts`）
 - Vite 开发环境 `/api` 代理到 `VITE_API_BASE_URL`（默认 `http://localhost:8000`）
 - 令牌存 `localStorage`（`access_token` / `refresh_token`）
+- 导航守卫：未登录跳转 `/login`，已登录访问公开页跳转 `/home`
 
 ### Lifecycle Management
 
@@ -170,6 +189,25 @@ PUT|DELETE /api/provider-management/models/{model_id}
 - Pydantic `HttpUrl` 验证后返回 URL 对象，存数据库前需转 `str`
 - 新增/修改模型后需通过 Alembic 生成并执行迁移
 - 新增模块后需在 `app.py` 中注册路由
+
+### 关键依赖
+
+- **后端**：FastAPI + SQLAlchemy 2.0 + asyncpg + redis + PyJWT + bcrypt + loguru + openai + anthropic
+- **前端**：Vue 3.5 + TypeScript 5.9 + Vite 7 + Vue Router 5 + Axios
+
+### 功能进度
+
+| 功能 | 后端 | 前端 | 状态 |
+|------|------|------|------|
+| 用户注册 / 登录 / 登出 | ✅ | ✅ | 完成 |
+| JWT 双令牌 + 静默刷新 | ✅ | ✅ | 完成 |
+| 角色权限守卫 | ✅ | ✅ | 完成 |
+| 供应商 CRUD | ✅ | ✅ | 完成 |
+| 模型 CRUD | ✅ | ✅ | 完成 |
+| 主布局 + 导航 + 仪表盘 | — | ✅ | 完成 |
+| AI 聊天 | 模型已建 | — | 待开发 |
+| 看板管理 | — | — | 待开发 |
+| 金融行情分析 | — | — | 待开发 |
 
 ## Code Style
 
