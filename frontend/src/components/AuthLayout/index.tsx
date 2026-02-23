@@ -1,5 +1,5 @@
-import { defineComponent } from 'vue'
-import { RouterLink } from 'vue-router'
+import { defineComponent, type PropType } from 'vue'
+import { RouterLink, type RouteLocationRaw } from 'vue-router'
 import styles from './AuthLayout.module.css'
 
 export default defineComponent({
@@ -7,7 +7,7 @@ export default defineComponent({
     title: { type: String, required: true },
     footerText: { type: String, required: true },
     footerLinkText: { type: String, required: true },
-    footerLinkTo: { type: String, required: true },
+    footerLinkTo: { type: [String, Object] as PropType<RouteLocationRaw>, required: true },
   },
   setup(props, { slots }) {
     return () => (

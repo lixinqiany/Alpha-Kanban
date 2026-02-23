@@ -1,0 +1,52 @@
+.card {
+  padding: 24px;
+  background-color: #ffffff;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+}
+
+.card:hover {
+  border-color: #0969da;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.cardIcon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #24292f;
+  margin: 0 0 8px;
+}
+
+.cardDesc {
+  font-size: 14px;
+  color: #656d76;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cardTag {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.tagSuccess {
+  color: #1a7f37;
+  background-color: #dafbe1;
+}
+
+.tagWarning {
+  color: #9a6700;
+  background-color: #fff8c5;
+}

@@ -38,7 +38,7 @@ export default defineComponent({
       loading.value = true
       try {
         await register(username.value, password.value)
-        router.push('/login')
+        router.push({ name: 'Login' })
       } catch (e: any) {
         const status = e.response?.status
         if (status === 409) {
@@ -56,7 +56,7 @@ export default defineComponent({
         title="Create your account"
         footerText="Already have an account?"
         footerLinkText="Sign in"
-        footerLinkTo="/login"
+        footerLinkTo={{ name: 'Login' }}
       >
         <form class={styles.card} onSubmit={handleSubmit}>
           {error.value && <div class={styles.error}>{error.value}</div>}
