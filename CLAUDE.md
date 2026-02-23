@@ -29,6 +29,13 @@ docker-compose -f docker/docker-compose.yml down
 
 无测试框架。
 
+```bash
+# 前端代码检查与格式化
+cd frontend && yarn lint          # ESLint 检查（ts/tsx/vue）
+cd frontend && yarn lint:fix      # ESLint 自动修复
+cd frontend && yarn format        # Prettier 格式化
+```
+
 ## Architecture
 
 **Backend**: FastAPI async + SQLAlchemy 2.0 (async) + asyncpg + redis.asyncio
@@ -215,3 +222,16 @@ PUT|DELETE /api/provider-management/models/{model_id}
 - JS/TS/TSX: 2 空格缩进，yarn 包管理
 - 注释使用中文
 - 详见 `.editorconfig`
+
+### 前端 ESLint + Prettier
+
+- **配置**：ESLint 9 Flat Config（`frontend/eslint.config.js`）+ Prettier（`frontend/.prettierrc`）
+- **规则集**：`@eslint/js` recommended → `typescript-eslint` recommended → `eslint-plugin-vue` recommended → Prettier
+- **Prettier 风格**：无分号、单引号、尾逗号、100 字符行宽、LF 换行
+- **关键自定义规则**：
+  - `no-console: warn`（允许 `console.warn` / `console.error`）
+  - `no-debugger: error`、`eqeqeq: error`、`no-var: error`、`prefer-const: error`
+  - `@typescript-eslint/no-explicit-any: warn`
+  - `@typescript-eslint/consistent-type-imports: error`（强制 `import type`）
+  - `vue/multi-word-component-names: off`
+- **修改前端代码后**：运行 `yarn lint:fix` 自动修复格式和可修复的 lint 问题，确保提交前无 error
