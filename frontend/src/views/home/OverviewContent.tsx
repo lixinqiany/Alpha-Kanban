@@ -1,27 +1,28 @@
 import { defineComponent } from 'vue'
+import FeatureCard from '../../components/FeatureCard'
 import styles from './home.module.css'
 
 const features = [
   {
-    icon: '\u{1F4CB}',
+    icon: <span>📋</span>,
     title: 'Kanban Board',
     description: 'Organize your tasks with a visual drag-and-drop kanban board.',
     tag: 'Coming soon',
-    tagClass: 'tagSoon',
+    tagVariant: 'warning' as const,
   },
   {
-    icon: '\u{1F4AC}',
+    icon: <span>💬</span>,
     title: 'AI Chat',
     description: 'Chat with AI models to get help with your work and brainstorming.',
     tag: 'Coming soon',
-    tagClass: 'tagSoon',
+    tagVariant: 'warning' as const,
   },
   {
-    icon: '\u{1F4C8}',
+    icon: <span>📈</span>,
     title: 'Financial Analysis',
     description: 'AI-powered financial market analysis and insights.',
     tag: 'Coming soon',
-    tagClass: 'tagSoon',
+    tagVariant: 'warning' as const,
   },
 ]
 
@@ -34,12 +35,14 @@ export default defineComponent({
 
         <div class={styles.grid}>
           {features.map((f) => (
-            <div class={styles.card} key={f.title}>
-              <div class={styles.cardIcon}>{f.icon}</div>
-              <h3 class={styles.cardTitle}>{f.title}</h3>
-              <p class={styles.cardDesc}>{f.description}</p>
-              <span class={[styles.cardTag, styles[f.tagClass]]}>{f.tag}</span>
-            </div>
+            <FeatureCard
+              key={f.title}
+              icon={f.icon}
+              title={f.title}
+              description={f.description}
+              tag={f.tag}
+              tagVariant={f.tagVariant}
+            />
           ))}
         </div>
       </div>
