@@ -1,10 +1,12 @@
 import { defineComponent, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { login } from '../../api/user'
 import AuthLayout from '../../components/AuthLayout'
 import styles from './auth.module.css'
 
 export default defineComponent({
   setup() {
+    const router = useRouter()
     const username = ref('')
     const password = ref('')
     const error = ref('')
@@ -22,7 +24,7 @@ export default defineComponent({
       loading.value = true
       try {
         await login(username.value, password.value)
-        console.log('login success')
+        router.push({ name: 'Home' })
       } catch (e: any) {
         const status = e.response?.status
         if (status === 401) {
@@ -40,7 +42,7 @@ export default defineComponent({
         title="Sign in to Alpha-Kanban"
         footerText="New here?"
         footerLinkText="Create an account"
-        footerLinkTo="/register"
+        footerLinkTo={{ name: 'Register' }}
       >
         <form class={styles.card} onSubmit={handleSubmit}>
           {error.value && <div class={styles.error}>{error.value}</div>}

@@ -163,7 +163,7 @@ export default defineComponent({
         render: (row) => (
           <div class={styles.btnGroup}>
             <button class={styles.btnSecondary} onClick={() => openEdit(row)}>Edit</button>
-            <button class={styles.btnSecondary} onClick={() => router.push(`/providers/${row.id}/models`)}>Models</button>
+            <button class={styles.btnSecondary} onClick={() => router.push({ name: 'AdminProviderModelManagement', params: { id: row.id } })}>Models</button>
             <button class={styles.btnDanger} onClick={() => openDelete(row)}>Delete</button>
           </div>
         ),

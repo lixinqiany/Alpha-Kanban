@@ -1,0 +1,56 @@
+/* ── 管理后台布局 ── */
+.wrapper {
+  display: flex;
+  height: 100%;
+}
+
+/* ── 侧边栏 ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-right: 1px solid #d1d9e0;
+  padding: 16px 0;
+}
+
+.sidebarTitle {
+  padding: 4px 16px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #656d76;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  padding: 6px 16px;
+  font-size: 14px;
+  color: #24292f;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.menuItem:hover {
+  background-color: #f6f8fa;
+}
+
+.menuItemActive {
+  background-color: #f6f8fa;
+  border-left-color: #fd8c73;
+  font-weight: 600;
+}
+
+/* ── 内容区 ── */
+.content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  background-color: #f6f8fa;
+}

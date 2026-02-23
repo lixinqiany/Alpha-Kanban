@@ -186,7 +186,7 @@ export default defineComponent({
       <div class={styles.page}>
         {/* 面包屑 */}
         <div class={styles.breadcrumb}>
-          <span class={styles.breadcrumbLink} onClick={() => router.push('/providers')}>Providers</span>
+          <span class={styles.breadcrumbLink} onClick={() => router.push({ name: 'AdminProviderManagement' })}>Providers</span>
           <span class={styles.breadcrumbSep}>/</span>
           <span>{provider.value?.name || '...'}</span>
         </div>
