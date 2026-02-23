@@ -53,10 +53,11 @@ async def login(
 @router.post("/refresh", response_model=AccessTokenResponse)
 async def refresh(
     data: RefreshRequest,
+    session: AsyncSession = Depends(get_postgres_session),
     redis: Redis = Depends(get_redis),
     jwt_config: JWTConfiguration = Depends(get_jwt_config),
 ):
-    result = await refresh_access_token(redis, jwt_config, data.refresh_token)
+    result = await refresh_access_token(session, redis, jwt_config, data.refresh_token)
     return result
 
 
