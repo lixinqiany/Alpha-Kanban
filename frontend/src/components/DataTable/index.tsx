@@ -62,9 +62,7 @@ export default defineComponent({
               {props.items.map((row, idx) => (
                 <tr key={row.id ?? idx}>
                   {props.columns.map((col) => (
-                    <td key={col.key}>
-                      {col.render ? col.render(row) : row[col.key]}
-                    </td>
+                    <td key={col.key}>{col.render ? col.render(row) : row[col.key]}</td>
                   ))}
                 </tr>
               ))}
@@ -83,10 +81,14 @@ export default defineComponent({
               <select
                 class={styles.pageSizeSelect}
                 value={props.pageSize}
-                onChange={(e) => emit('pageSizeChange', Number((e.target as HTMLSelectElement).value))}
+                onChange={(e) =>
+                  emit('pageSizeChange', Number((e.target as HTMLSelectElement).value))
+                }
               >
                 {props.pageSizeOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt} / page</option>
+                  <option key={opt} value={opt}>
+                    {opt} / page
+                  </option>
                 ))}
               </select>
             </div>
@@ -98,7 +100,9 @@ export default defineComponent({
               >
                 Previous
               </button>
-              <span>{props.page} / {totalPages()}</span>
+              <span>
+                {props.page} / {totalPages()}
+              </span>
               <button
                 class={styles.pageBtn}
                 disabled={props.page >= totalPages()}

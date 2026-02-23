@@ -22,13 +22,9 @@ const router = createRouter({
           path: 'home',
           component: HomeView,
           meta: {
-            tabs: [
-              { label: 'Overview', to: '/home' },
-            ],
+            tabs: [{ label: 'Overview', to: '/home' }],
           },
-          children: [
-            { path: '', name: 'Home', component: OverviewContent },
-          ],
+          children: [{ path: '', name: 'Home', component: OverviewContent }],
         },
         {
           path: 'admin',
@@ -36,7 +32,11 @@ const router = createRouter({
           children: [
             { path: '', redirect: { name: 'AdminProviderManagement' } },
             { path: 'providers', name: 'AdminProviderManagement', component: ProviderListView },
-            { path: 'providers/:id/models', name: 'AdminProviderModelManagement', component: ProviderModelsView },
+            {
+              path: 'providers/:id/models',
+              name: 'AdminProviderModelManagement',
+              component: ProviderModelsView,
+            },
           ],
         },
       ],
@@ -45,7 +45,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to:RouteLocationNormalized) => {
+router.beforeEach((to: RouteLocationNormalized) => {
   const token = localStorage.getItem('access_token')
   // to.path 只包含 URL 的路径部分，不含域名、查询参数、哈希。
   const isPublic = to.name === 'Login' || to.name === 'Register'

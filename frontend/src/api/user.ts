@@ -13,7 +13,10 @@ interface TokenResponse {
 }
 
 export async function register(username: string, password: string): Promise<RegisterResponse> {
-  const { data } = await publicClient.post<RegisterResponse>('/user/register', { username, password })
+  const { data } = await publicClient.post<RegisterResponse>('/user/register', {
+    username,
+    password,
+  })
   return data
 }
 

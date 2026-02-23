@@ -30,9 +30,7 @@ export default defineComponent({
     return () => {
       const iconNode = props.icon ?? slots.icon?.()
 
-      const tagVariantClass = props.tagVariant === 'success'
-        ? styles.tagSuccess
-        : styles.tagWarning
+      const tagVariantClass = props.tagVariant === 'success' ? styles.tagSuccess : styles.tagWarning
 
       return (
         <div
@@ -42,9 +40,7 @@ export default defineComponent({
           {iconNode && <div class={styles.cardIcon}>{iconNode}</div>}
           <h3 class={styles.cardTitle}>{props.title}</h3>
           <p class={styles.cardDesc}>{props.description}</p>
-          {props.tag && (
-            <span class={[styles.cardTag, tagVariantClass]}>{props.tag}</span>
-          )}
+          {props.tag && <span class={[styles.cardTag, tagVariantClass]}>{props.tag}</span>}
         </div>
       )
     }

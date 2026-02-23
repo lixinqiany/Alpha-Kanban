@@ -27,8 +27,8 @@ export default defineComponent({
       const ht = props.height ?? props.size
 
       const style: CSSProperties = {}
-      if (w != null) style.width = `${w}px`
-      if (ht != null) style.height = `${ht}px`
+      if (w !== null && w !== undefined) style.width = `${w}px`
+      if (ht !== null && ht !== undefined) style.height = `${ht}px`
       if (props.color) style.color = props.color
 
       return (

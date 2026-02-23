@@ -42,9 +42,7 @@ export default defineComponent({
       return (
         <div class={styles.wrapper}>
           {/* 当侧边栏抽屉显示时，显示遮罩层 */}
-          {showSidebar.value && (
-            <div class={styles.overlay} onClick={closeSidebar} />
-          )}
+          {showSidebar.value && <div class={styles.overlay} onClick={closeSidebar} />}
           {/* 侧边栏抽屉 */}
           <aside class={[styles.sidebar, showSidebar.value && styles.sidebarOpen]}>
             <div class={styles.sidebarHeader}>
@@ -58,11 +56,7 @@ export default defineComponent({
             {/* 分割线 */}
             <div class={styles.sidebarDivider} />
             <nav class={styles.sidebarNav}>
-              <RouterLink
-                to={{ name: 'Home' }}
-                class={styles.sidebarLink}
-                onClick={closeSidebar}
-              >
+              <RouterLink to={{ name: 'Home' }} class={styles.sidebarLink} onClick={closeSidebar}>
                 Home
               </RouterLink>
               {isAdmin() && (
@@ -76,7 +70,13 @@ export default defineComponent({
               )}
             </nav>
             <div class={styles.sidebarFooter}>
-              <button class={styles.sidebarLink} onClick={() => { closeSidebar(); handleSignOut() }}>
+              <button
+                class={styles.sidebarLink}
+                onClick={() => {
+                  closeSidebar()
+                  handleSignOut()
+                }}
+              >
                 Sign out
               </button>
             </div>
@@ -91,7 +91,12 @@ export default defineComponent({
                 </svg>
               </button>
               <RouterLink to={{ name: 'Home' }} class={styles.logoLink}>
-                <svg class={styles.logo} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  class={styles.logo}
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <rect x="2" y="4" width="7" height="18" rx="2" fill="#0969da" />
                   <rect x="12.5" y="4" width="7" height="13" rx="2" fill="#1a7f37" />
                   <rect x="23" y="4" width="7" height="22" rx="2" fill="#8250df" />
@@ -103,22 +108,22 @@ export default defineComponent({
             <div class={styles.navRight}>
               <Dropdown placement="bottom-right">
                 {{
-                  trigger: () => (
-                    <button class={styles.avatarBtn}>
-                      {initial}
-                    </button>
-                  ),
+                  trigger: () => <button class={styles.avatarBtn}>{initial}</button>,
                   default: () => (
                     <>
                       <div class={styles.dropdownHeader}>{user?.sub || 'User'}</div>
                       <div class={styles.dropdownDivider}></div>
                       {isAdmin() && (
                         <>
-                          <button class={styles.dropdownItem} onClick={handleAdmin}>Admin</button>
+                          <button class={styles.dropdownItem} onClick={handleAdmin}>
+                            Admin
+                          </button>
                           <div class={styles.dropdownDivider}></div>
                         </>
                       )}
-                      <button class={styles.dropdownItem} onClick={handleSignOut}>Sign out</button>
+                      <button class={styles.dropdownItem} onClick={handleSignOut}>
+                        Sign out
+                      </button>
                     </>
                   ),
                 }}
@@ -133,10 +138,7 @@ export default defineComponent({
                 {tabs.map((tab) => (
                   <RouterLink
                     to={tab.to}
-                    class={[
-                      styles.tabItem,
-                      route.path === tab.to && styles.tabItemActive,
-                    ]}
+                    class={[styles.tabItem, route.path === tab.to && styles.tabItemActive]}
                   >
                     {tab.label}
                   </RouterLink>

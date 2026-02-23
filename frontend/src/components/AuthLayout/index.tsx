@@ -13,7 +13,12 @@ export default defineComponent({
     return () => (
       <div class={styles.page}>
         <div class={styles.header}>
-          <svg class={styles.logo} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class={styles.logo}
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             {/* 左：红色阴线（跌） */}
             <line x1="10" y1="4" x2="10" y2="44" stroke="#cf222e" stroke-width="2" />
             <rect x="5" y="12" width="10" height="16" rx="1" fill="#cf222e" />

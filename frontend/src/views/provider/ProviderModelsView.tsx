@@ -113,7 +113,8 @@ export default defineComponent({
         if (editingModel.value) {
           const payload: ModelUpdateData = {}
           if (formName.value !== editingModel.value.name) payload.name = formName.value
-          if (formDisplayName.value !== editingModel.value.display_name) payload.display_name = formDisplayName.value
+          if (formDisplayName.value !== editingModel.value.display_name)
+            payload.display_name = formDisplayName.value
           payload.is_enabled = formEnabled.value
           await updateModel(editingModel.value.id, payload)
         } else {
@@ -164,7 +165,9 @@ export default defineComponent({
         key: 'is_enabled',
         title: 'Status',
         render: (row) => (
-          <span class={[styles.status, row.is_enabled ? styles.statusEnabled : styles.statusDisabled]}>
+          <span
+            class={[styles.status, row.is_enabled ? styles.statusEnabled : styles.statusDisabled]}
+          >
             <span class={styles.statusDot}></span>
             {row.is_enabled ? 'Enabled' : 'Disabled'}
           </span>
@@ -175,8 +178,12 @@ export default defineComponent({
         title: 'Actions',
         render: (row) => (
           <div class={styles.btnGroup}>
-            <button class={styles.btnSecondary} onClick={() => openEdit(row)}>Edit</button>
-            <button class={styles.btnDanger} onClick={() => openDelete(row)}>Delete</button>
+            <button class={styles.btnSecondary} onClick={() => openEdit(row)}>
+              Edit
+            </button>
+            <button class={styles.btnDanger} onClick={() => openDelete(row)}>
+              Delete
+            </button>
           </div>
         ),
       },
@@ -186,7 +193,12 @@ export default defineComponent({
       <div class={styles.page}>
         {/* 面包屑 */}
         <div class={styles.breadcrumb}>
-          <span class={styles.breadcrumbLink} onClick={() => router.push({ name: 'AdminProviderManagement' })}>Providers</span>
+          <span
+            class={styles.breadcrumbLink}
+            onClick={() => router.push({ name: 'AdminProviderManagement' })}
+          >
+            Providers
+          </span>
           <span class={styles.breadcrumbSep}>/</span>
           <span>{provider.value?.name || '...'}</span>
         </div>
@@ -198,7 +210,12 @@ export default defineComponent({
             <div class={styles.summaryMeta}>
               {provider.value.base_url || 'No base URL set'}
               {' · '}
-              <span class={[styles.status, provider.value.is_enabled ? styles.statusEnabled : styles.statusDisabled]}>
+              <span
+                class={[
+                  styles.status,
+                  provider.value.is_enabled ? styles.statusEnabled : styles.statusDisabled,
+                ]}
+              >
                 <span class={styles.statusDot}></span>
                 {provider.value.is_enabled ? 'Enabled' : 'Disabled'}
               </span>
@@ -208,7 +225,9 @@ export default defineComponent({
 
         <div class={styles.header}>
           <h1 class={styles.title}>Models</h1>
-          <button class={styles.btnPrimary} onClick={openCreate}>New model</button>
+          <button class={styles.btnPrimary} onClick={openCreate}>
+            New model
+          </button>
         </div>
 
         {error.value && <div class={styles.error}>{error.value}</div>}
@@ -226,11 +245,18 @@ export default defineComponent({
 
         {/* 创建/编辑 Modal */}
         {showFormModal.value && (
-          <div class={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) showFormModal.value = false }}>
+          <div
+            class={styles.overlay}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) showFormModal.value = false
+            }}
+          >
             <div class={styles.modal}>
               <div class={styles.modalHeader}>
                 <h2 class={styles.modalTitle}>{editingModel.value ? 'Edit model' : 'New model'}</h2>
-                <button class={styles.modalClose} onClick={() => showFormModal.value = false}>&times;</button>
+                <button class={styles.modalClose} onClick={() => (showFormModal.value = false)}>
+                  &times;
+                </button>
               </div>
               <form onSubmit={handleFormSubmit}>
                 <div class={styles.modalBody}>
@@ -243,7 +269,7 @@ export default defineComponent({
                       type="text"
                       placeholder="gpt-4o"
                       value={formName.value}
-                      onInput={(e) => formName.value = (e.target as HTMLInputElement).value}
+                      onInput={(e) => (formName.value = (e.target as HTMLInputElement).value)}
                     />
                   </div>
 
@@ -254,7 +280,9 @@ export default defineComponent({
                       type="text"
                       placeholder="GPT-4o"
                       value={formDisplayName.value}
-                      onInput={(e) => formDisplayName.value = (e.target as HTMLInputElement).value}
+                      onInput={(e) =>
+                        (formDisplayName.value = (e.target as HTMLInputElement).value)
+                      }
                     />
                   </div>
 
@@ -263,14 +291,22 @@ export default defineComponent({
                       <input
                         type="checkbox"
                         checked={formEnabled.value}
-                        onChange={(e) => formEnabled.value = (e.target as HTMLInputElement).checked}
+                        onChange={(e) =>
+                          (formEnabled.value = (e.target as HTMLInputElement).checked)
+                        }
                       />
                       Enabled
                     </label>
                   </div>
                 </div>
                 <div class={styles.modalFooter}>
-                  <button type="button" class={styles.btnSecondary} onClick={() => showFormModal.value = false}>Cancel</button>
+                  <button
+                    type="button"
+                    class={styles.btnSecondary}
+                    onClick={() => (showFormModal.value = false)}
+                  >
+                    Cancel
+                  </button>
                   <button type="submit" class={styles.btnPrimary} disabled={formLoading.value}>
                     {formLoading.value ? 'Saving...' : 'Save'}
                   </button>
@@ -282,20 +318,34 @@ export default defineComponent({
 
         {/* 删除确认 Modal */}
         {showDeleteModal.value && deletingModel.value && (
-          <div class={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) showDeleteModal.value = false }}>
+          <div
+            class={styles.overlay}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) showDeleteModal.value = false
+            }}
+          >
             <div class={styles.modal}>
               <div class={styles.modalHeader}>
                 <h2 class={styles.modalTitle}>Delete model</h2>
-                <button class={styles.modalClose} onClick={() => showDeleteModal.value = false}>&times;</button>
+                <button class={styles.modalClose} onClick={() => (showDeleteModal.value = false)}>
+                  &times;
+                </button>
               </div>
               <div class={styles.modalBody}>
                 <p class={styles.confirmText}>
-                  Are you sure you want to delete model <strong>{deletingModel.value.display_name}</strong>? This action cannot be undone.
+                  Are you sure you want to delete model{' '}
+                  <strong>{deletingModel.value.display_name}</strong>? This action cannot be undone.
                 </p>
               </div>
               <div class={styles.modalFooter}>
-                <button class={styles.btnSecondary} onClick={() => showDeleteModal.value = false}>Cancel</button>
-                <button class={styles.btnDanger} onClick={handleDelete} disabled={deleteLoading.value}>
+                <button class={styles.btnSecondary} onClick={() => (showDeleteModal.value = false)}>
+                  Cancel
+                </button>
+                <button
+                  class={styles.btnDanger}
+                  onClick={handleDelete}
+                  disabled={deleteLoading.value}
+                >
                   {deleteLoading.value ? 'Deleting...' : 'Delete'}
                 </button>
               </div>

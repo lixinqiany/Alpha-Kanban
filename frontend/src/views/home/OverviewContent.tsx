@@ -31,7 +31,9 @@ export default defineComponent({
     return () => (
       <div class={styles.page}>
         <h1 class={styles.welcome}>Welcome to Alpha-Kanban</h1>
-        <p class={styles.subtitle}>Your all-in-one platform for task management, AI chat, and financial analysis.</p>
+        <p class={styles.subtitle}>
+          Your all-in-one platform for task management, AI chat, and financial analysis.
+        </p>
 
         <div class={styles.grid}>
           {features.map((f) => (

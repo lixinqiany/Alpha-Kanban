@@ -61,7 +61,9 @@ export default defineComponent({
         <form class={styles.card} onSubmit={handleSubmit}>
           {error.value && <div class={styles.error}>{error.value}</div>}
 
-          <label class={styles.label} for="username">Username</label>
+          <label class={styles.label} for="username">
+            Username
+          </label>
           <input
             id="username"
             class={styles.input}
@@ -71,7 +73,9 @@ export default defineComponent({
             onInput={(e) => (username.value = (e.target as HTMLInputElement).value)}
           />
 
-          <label class={styles.label} for="password">Password</label>
+          <label class={styles.label} for="password">
+            Password
+          </label>
           <input
             id="password"
             class={styles.input}

@@ -61,10 +61,13 @@ export interface ModelUpdateData {
 
 const BASE = '/provider-management'
 
-export async function fetchProviders(page = 1, pageSize = 10): Promise<PaginatedResponse<Provider>> {
-  const { data } = await authClient.get<PaginatedResponse<Provider>>(
-    `${BASE}/providers`, { params: { page, page_size: pageSize } },
-  )
+export async function fetchProviders(
+  page = 1,
+  pageSize = 10,
+): Promise<PaginatedResponse<Provider>> {
+  const { data } = await authClient.get<PaginatedResponse<Provider>>(`${BASE}/providers`, {
+    params: { page, page_size: pageSize },
+  })
   return data
 }
 
@@ -89,19 +92,33 @@ export async function deleteProvider(id: string): Promise<void> {
 
 // ── Model API ──
 
-export async function fetchModels(providerId: string, page = 1, pageSize = 10): Promise<PaginatedResponse<ProviderModel>> {
+export async function fetchModels(
+  providerId: string,
+  page = 1,
+  pageSize = 10,
+): Promise<PaginatedResponse<ProviderModel>> {
   const { data } = await authClient.get<PaginatedResponse<ProviderModel>>(
-    `${BASE}/providers/${providerId}/models`, { params: { page, page_size: pageSize } },
+    `${BASE}/providers/${providerId}/models`,
+    { params: { page, page_size: pageSize } },
   )
   return data
 }
 
-export async function createModel(providerId: string, payload: ModelCreateData): Promise<ProviderModel> {
-  const { data } = await authClient.post<ProviderModel>(`${BASE}/providers/${providerId}/models`, payload)
+export async function createModel(
+  providerId: string,
+  payload: ModelCreateData,
+): Promise<ProviderModel> {
+  const { data } = await authClient.post<ProviderModel>(
+    `${BASE}/providers/${providerId}/models`,
+    payload,
+  )
   return data
 }
 
-export async function updateModel(modelId: string, payload: ModelUpdateData): Promise<ProviderModel> {
+export async function updateModel(
+  modelId: string,
+  payload: ModelUpdateData,
+): Promise<ProviderModel> {
   const { data } = await authClient.put<ProviderModel>(`${BASE}/models/${modelId}`, payload)
   return data
 }
