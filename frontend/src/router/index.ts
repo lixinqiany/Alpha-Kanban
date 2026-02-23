@@ -5,7 +5,6 @@ import AppLayout from '../components/AppLayout'
 import AdminLayout from '../components/AdminLayout'
 import HomeView from '../views/home/HomeView'
 import OverviewContent from '../views/home/OverviewContent'
-import ActivityContent from '../views/home/ActivityContent'
 import ProviderListView from '../views/provider/ProviderListView'
 import ProviderModelsView from '../views/provider/ProviderModelsView'
 
@@ -25,12 +24,10 @@ const router = createRouter({
           meta: {
             tabs: [
               { label: 'Overview', to: '/home' },
-              { label: 'Activity', to: '/home/activity' },
             ],
           },
           children: [
             { path: '', name: 'Home', component: OverviewContent },
-            { path: 'activity', name: 'HomeActivity', component: ActivityContent },
           ],
         },
         {
