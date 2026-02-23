@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
 from config.postgres import get_postgres_session
-from models.user import User
-from modules.user.dependencies import get_current_user
+from models.user import UserRole
+from modules.user.dependencies import require_roles
 from modules.provider_management.schema import (
     ProviderCreateRequest,
     ProviderUpdateRequest,
@@ -31,7 +31,7 @@ from modules.provider_management.service import (
 router = APIRouter(
     prefix="/api/provider-management",
     tags=["provider-management"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_roles(UserRole.ADMIN))],
 )
 
 

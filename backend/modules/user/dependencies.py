@@ -1,7 +1,7 @@
 """路由守卫：提取并验证 access token，返回当前用户"""
 
 import jwt
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.auth import decode_token
 from config.environment import Environment, JWTConfiguration
 from config.postgres import get_postgres_session
-from models.user import User
+from models.user import User, UserRole
 
 bearer_scheme = HTTPBearer()
 
@@ -52,3 +52,26 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="用户不存在")
 
     return user
+
+
+def require_roles(*roles: UserRole):
+    """角色守卫工厂函数，返回一个 FastAPI 依赖。
+
+    用法：
+      - 单个路由: @router.get("/admin", dependencies=[Depends(require_roles(UserRole.ADMIN))])
+      - 整个Router: APIRouter(dependencies=[Depends(require_roles(UserRole.ADMIN))])
+      - 多角色(OR): Depends(require_roles(UserRole.ADMIN, UserRole.USER))
+    """
+    allowed = [r.value for r in roles]
+
+    async def role_checker(
+        current_user: User = Depends(get_current_user),
+    ) -> User:
+        if current_user.role not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="权限不足，无法访问该资源",
+            )
+        return current_user
+
+    return role_checker
