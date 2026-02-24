@@ -41,7 +41,7 @@ async def create_provider(session: AsyncSession, data: ProviderCreateRequest) ->
     provider = Provider(
         name=data.name,
         api_key=data.api_key,
-        base_url=str(data.base_url),
+        base_url_map={k.value: v for k, v in data.base_url_map.items()},
         is_enabled=data.is_enabled,
     )
     session.add(provider)
@@ -65,8 +65,8 @@ async def update_provider(
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
-        if field == "base_url" and value is not None:
-            value = str(value)
+        if field == "base_url_map" and value is not None:
+            value = {k: v for k, v in value.items()}
         setattr(provider, field, value)
 
     await session.commit()
@@ -106,6 +106,7 @@ async def create_model(
         provider_id=provider_id,
         name=data.name,
         display_name=data.display_name,
+        manufacturer=data.manufacturer.value,
         is_enabled=data.is_enabled,
     )
     session.add(model)

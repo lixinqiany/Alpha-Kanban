@@ -29,7 +29,8 @@ export default defineComponent({
     const editingProvider = ref<Provider | null>(null)
     const formName = ref('')
     const formApiKey = ref('')
-    const formBaseUrl = ref('')
+    const MANUFACTURERS = ['openai', 'anthropic']
+    const formBaseUrlEntries = ref<{ manufacturer: string; url: string }[]>([])
     const formEnabled = ref(true)
     const formError = ref('')
     const formLoading = ref(false)
@@ -70,7 +71,7 @@ export default defineComponent({
       editingProvider.value = null
       formName.value = ''
       formApiKey.value = ''
-      formBaseUrl.value = ''
+      formBaseUrlEntries.value = []
       formEnabled.value = true
       formError.value = ''
       showFormModal.value = true
@@ -80,7 +81,10 @@ export default defineComponent({
       editingProvider.value = p
       formName.value = p.name
       formApiKey.value = ''
-      formBaseUrl.value = p.base_url || ''
+      formBaseUrlEntries.value = Object.entries(p.base_url_map || {}).map(([k, v]) => ({
+        manufacturer: k,
+        url: v,
+      }))
       formEnabled.value = p.is_enabled
       formError.value = ''
       showFormModal.value = true
@@ -95,7 +99,11 @@ export default defineComponent({
           const payload: ProviderUpdateData = {}
           if (formName.value !== editingProvider.value.name) payload.name = formName.value
           if (formApiKey.value) payload.api_key = formApiKey.value
-          payload.base_url = formBaseUrl.value || null
+          const urlMap: Record<string, string> = {}
+          for (const entry of formBaseUrlEntries.value) {
+            if (entry.manufacturer && entry.url) urlMap[entry.manufacturer] = entry.url
+          }
+          payload.base_url_map = urlMap
           payload.is_enabled = formEnabled.value
           await updateProvider(editingProvider.value.id, payload)
         } else {
@@ -104,10 +112,14 @@ export default defineComponent({
             formLoading.value = false
             return
           }
+          const urlMap: Record<string, string> = {}
+          for (const entry of formBaseUrlEntries.value) {
+            if (entry.manufacturer && entry.url) urlMap[entry.manufacturer] = entry.url
+          }
           const payload: ProviderCreateData = {
             name: formName.value,
             api_key: formApiKey.value,
-            base_url: formBaseUrl.value || null,
+            base_url_map: urlMap,
             is_enabled: formEnabled.value,
           }
           await createProvider(payload)
@@ -144,9 +156,13 @@ export default defineComponent({
       const columns: Column<Provider>[] = [
         { key: 'name', title: t('provider.name') },
         {
-          key: 'base_url',
-          title: t('provider.baseUrl'),
-          render: (row) => row.base_url || '—',
+          key: 'base_url_map',
+          title: t('provider.baseUrlMap'),
+          render: (row) => {
+            const entries = Object.entries(row.base_url_map || {})
+            if (entries.length === 0) return '—'
+            return entries.map(([k, v]) => `${k}: ${v}`).join(', ')
+          },
         },
         {
           key: 'is_enabled',
@@ -255,14 +271,66 @@ export default defineComponent({
                     </div>
 
                     <div class={styles.formGroup}>
-                      <label class={styles.formLabel}>{t('provider.baseUrl')}</label>
-                      <input
-                        class={styles.formInput}
-                        type="text"
-                        placeholder="https://api.openai.com/v1"
-                        value={formBaseUrl.value}
-                        onInput={(e) => (formBaseUrl.value = (e.target as HTMLInputElement).value)}
-                      />
+                      <label class={styles.formLabel}>{t('provider.baseUrlMap')}</label>
+                      {formBaseUrlEntries.value.map((entry, idx) => (
+                        <div key={idx} class={styles.baseUrlRow}>
+                          <select
+                            class={styles.baseUrlSelect}
+                            value={entry.manufacturer}
+                            onChange={(e) => {
+                              formBaseUrlEntries.value[idx].manufacturer = (
+                                e.target as HTMLSelectElement
+                              ).value
+                            }}
+                          >
+                            {MANUFACTURERS.map((m) => (
+                              <option
+                                key={m}
+                                value={m}
+                                disabled={
+                                  m !== entry.manufacturer &&
+                                  formBaseUrlEntries.value.some((e) => e.manufacturer === m)
+                                }
+                              >
+                                {m}
+                              </option>
+                            ))}
+                          </select>
+                          <input
+                            class={styles.baseUrlInput}
+                            type="text"
+                            placeholder="https://..."
+                            value={entry.url}
+                            onInput={(e) => {
+                              formBaseUrlEntries.value[idx].url = (
+                                e.target as HTMLInputElement
+                              ).value
+                            }}
+                          />
+                          <button
+                            type="button"
+                            class={styles.baseUrlRemove}
+                            onClick={() => formBaseUrlEntries.value.splice(idx, 1)}
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+                      {formBaseUrlEntries.value.length < MANUFACTURERS.length && (
+                        <button
+                          type="button"
+                          class={styles.btnSecondary}
+                          onClick={() => {
+                            const used = new Set(
+                              formBaseUrlEntries.value.map((e) => e.manufacturer),
+                            )
+                            const next = MANUFACTURERS.find((m) => !used.has(m)) || MANUFACTURERS[0]
+                            formBaseUrlEntries.value.push({ manufacturer: next, url: '' })
+                          }}
+                        >
+                          + {t('provider.addBaseUrl')}
+                        </button>
+                      )}
                     </div>
 
                     <div class={styles.formGroup}>

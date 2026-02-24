@@ -15,7 +15,7 @@ export interface PaginatedResponse<T> {
 export interface Provider {
   id: string
   name: string
-  base_url: string | null
+  base_url_map: Record<string, string>
   is_enabled: boolean
   created_at: string
   updated_at: string
@@ -24,14 +24,14 @@ export interface Provider {
 export interface ProviderCreateData {
   name: string
   api_key: string
-  base_url?: string | null
+  base_url_map?: Record<string, string>
   is_enabled?: boolean
 }
 
 export interface ProviderUpdateData {
   name?: string
   api_key?: string
-  base_url?: string | null
+  base_url_map?: Record<string, string>
   is_enabled?: boolean
 }
 
@@ -40,6 +40,7 @@ export interface ProviderModel {
   provider_id: string
   name: string
   display_name: string
+  manufacturer: string
   is_enabled: boolean
   created_at: string
   updated_at: string
@@ -48,12 +49,14 @@ export interface ProviderModel {
 export interface ModelCreateData {
   name: string
   display_name: string
+  manufacturer: string
   is_enabled?: boolean
 }
 
 export interface ModelUpdateData {
   name?: string
   display_name?: string
+  manufacturer?: string
   is_enabled?: boolean
 }
 

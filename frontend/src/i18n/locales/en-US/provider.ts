@@ -5,6 +5,8 @@ export default {
   deleteProvider: 'Delete provider',
   name: 'Name',
   baseUrl: 'Base URL',
+  baseUrlMap: 'Base URL Config',
+  addBaseUrl: 'Add Base URL',
   apiKey: 'API Key',
   apiKeyHint: '(leave blank to keep current)',
   status: 'Status',

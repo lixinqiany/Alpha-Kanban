@@ -5,6 +5,8 @@ export default {
   deleteProvider: '删除供应商',
   name: '名称',
   baseUrl: 'Base URL',
+  baseUrlMap: 'Base URL 配置',
+  addBaseUrl: '添加 Base URL',
   apiKey: 'API Key',
   apiKeyHint: '（留空保持当前值）',
   status: '状态',

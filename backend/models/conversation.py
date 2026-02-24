@@ -68,3 +68,6 @@ class Message(Base):
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default="completed",
     )
+    thinking: Mapped[str | None] = mapped_column(
+        Text(), nullable=True,
+    )

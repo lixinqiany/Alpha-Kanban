@@ -1,7 +1,8 @@
 import uuid
 
 from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, Uuid
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
 
@@ -15,12 +16,13 @@ class Provider(Base):
     api_key: Mapped[str] = mapped_column(
         String(500), nullable=False,
     )
-    base_url: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+    base_url_map: Mapped[dict] = mapped_column(
+        JSONB(), nullable=False, server_default="{}",
     )
     is_enabled: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, server_default="true",
     )
+    models: Mapped[list["Model"]] = relationship(back_populates="provider")
 
 
 class Model(Base):
@@ -39,6 +41,10 @@ class Model(Base):
     display_name: Mapped[str] = mapped_column(
         String(100), nullable=False,
     )
+    manufacturer: Mapped[str] = mapped_column(
+        String(20), nullable=False,
+    )
     is_enabled: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, server_default="true",
     )
+    provider: Mapped["Provider"] = relationship(back_populates="models")

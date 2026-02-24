@@ -5,6 +5,7 @@ export default {
   deleteModel: '删除模型',
   modelName: '模型名称',
   displayName: '显示名称',
+  manufacturer: '原厂商',
   loadFailed: '加载模型列表失败',
   loadDataFailed: '加载数据失败',
   nameAndDisplayRequired: '模型名称和显示名称为必填项',

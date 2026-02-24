@@ -5,6 +5,7 @@ export default {
   deleteModel: 'Delete model',
   modelName: 'Model Name',
   displayName: 'Display Name',
+  manufacturer: 'Manufacturer',
   loadFailed: 'Failed to load models',
   loadDataFailed: 'Failed to load data',
   nameAndDisplayRequired: 'Model name and display name are required',

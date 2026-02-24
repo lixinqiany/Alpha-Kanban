@@ -13,12 +13,6 @@ from typing import Literal
 LLMRole = Literal["system", "user", "assistant"]
 
 
-class AdapterType(str, Enum):
-    """LLM 原厂适配器类型"""
-    OPENAI = "openai"
-    ANTHROPIC = "anthropic"
-
-
 class ChunkType(str, Enum):
     """流式块类型"""
     THINKING = "thinking"

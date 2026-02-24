@@ -35,6 +35,7 @@ export default defineComponent({
     const editingModel = ref<ProviderModel | null>(null)
     const formName = ref('')
     const formDisplayName = ref('')
+    const formManufacturer = ref('openai')
     const formEnabled = ref(true)
     const formError = ref('')
     const formLoading = ref(false)
@@ -93,6 +94,7 @@ export default defineComponent({
       editingModel.value = null
       formName.value = ''
       formDisplayName.value = ''
+      formManufacturer.value = 'openai'
       formEnabled.value = true
       formError.value = ''
       showFormModal.value = true
@@ -102,6 +104,7 @@ export default defineComponent({
       editingModel.value = m
       formName.value = m.name
       formDisplayName.value = m.display_name
+      formManufacturer.value = m.manufacturer
       formEnabled.value = m.is_enabled
       formError.value = ''
       showFormModal.value = true
@@ -117,6 +120,8 @@ export default defineComponent({
           if (formName.value !== editingModel.value.name) payload.name = formName.value
           if (formDisplayName.value !== editingModel.value.display_name)
             payload.display_name = formDisplayName.value
+          if (formManufacturer.value !== editingModel.value.manufacturer)
+            payload.manufacturer = formManufacturer.value
           payload.is_enabled = formEnabled.value
           await updateModel(editingModel.value.id, payload)
         } else {
@@ -128,6 +133,7 @@ export default defineComponent({
           const payload: ModelCreateData = {
             name: formName.value,
             display_name: formDisplayName.value,
+            manufacturer: formManufacturer.value,
             is_enabled: formEnabled.value,
           }
           await createModel(providerId, payload)
@@ -164,6 +170,7 @@ export default defineComponent({
       const columns: Column<ProviderModel>[] = [
         { key: 'name', title: t('model.modelName') },
         { key: 'display_name', title: t('model.displayName') },
+        { key: 'manufacturer', title: t('model.manufacturer') },
         {
           key: 'is_enabled',
           title: t('provider.status'),
@@ -211,7 +218,11 @@ export default defineComponent({
             <div class={styles.summaryCard}>
               <h2 class={styles.summaryName}>{provider.value.name}</h2>
               <div class={styles.summaryMeta}>
-                {provider.value.base_url || t('model.noBaseUrl')}
+                {Object.keys(provider.value.base_url_map || {}).length > 0
+                  ? Object.entries(provider.value.base_url_map)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(' · ')
+                  : t('model.noBaseUrl')}
                 {' · '}
                 <span
                   class={[
@@ -289,6 +300,20 @@ export default defineComponent({
                           (formDisplayName.value = (e.target as HTMLInputElement).value)
                         }
                       />
+                    </div>
+
+                    <div class={styles.formGroup}>
+                      <label class={styles.formLabel}>{t('model.manufacturer')}</label>
+                      <select
+                        class={styles.formInput}
+                        value={formManufacturer.value}
+                        onChange={(e) =>
+                          (formManufacturer.value = (e.target as HTMLSelectElement).value)
+                        }
+                      >
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                      </select>
                     </div>
 
                     <div class={styles.formGroup}>

@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 # revision identifiers, used by Alembic.
@@ -24,7 +25,7 @@ def upgrade() -> None:
     op.create_table('providers',
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('api_key', sa.String(length=500), nullable=False),
-    sa.Column('base_url', sa.String(length=500), nullable=True),
+    sa.Column('base_url_map', JSONB(), server_default='{}', nullable=False),
     sa.Column('is_enabled', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -48,6 +49,7 @@ def upgrade() -> None:
     sa.Column('provider_id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('display_name', sa.String(length=100), nullable=False),
+    sa.Column('manufacturer', sa.String(length=20), nullable=False),
     sa.Column('is_enabled', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -64,6 +66,7 @@ def upgrade() -> None:
     sa.Column('content', sa.Text(), server_default='', nullable=False),
     sa.Column('model', sa.String(length=100), nullable=True),
     sa.Column('status', sa.String(length=20), server_default='completed', nullable=False),
+    sa.Column('thinking', sa.Text(), nullable=True),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
