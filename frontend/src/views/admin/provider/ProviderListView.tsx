@@ -10,6 +10,8 @@ import {
   type ProviderUpdateData,
 } from '../../../api/provider'
 import DataTable, { type Column } from '../../../components/DataTable'
+import type { Manufacturer } from '../../../utils/enums/manufacturer.enum'
+import { MANUFACTURERS, ManufacturerLabel } from '../../../utils/enums/manufacturer.enum'
 import styles from './provider.module.css'
 
 export default defineComponent({
@@ -27,8 +29,7 @@ export default defineComponent({
     const editingProvider = ref<Provider | null>(null)
     const formName = ref('')
     const formApiKey = ref('')
-    const MANUFACTURERS = ['openai', 'anthropic']
-    const formBaseUrlEntries = ref<{ manufacturer: string; url: string }[]>([])
+    const formBaseUrlEntries = ref<{ manufacturer: Manufacturer; url: string }[]>([])
     const formEnabled = ref(true)
     const formError = ref('')
     const formLoading = ref(false)
@@ -80,7 +81,7 @@ export default defineComponent({
       formName.value = p.name
       formApiKey.value = ''
       formBaseUrlEntries.value = Object.entries(p.base_url_map || {}).map(([k, v]) => ({
-        manufacturer: k,
+        manufacturer: k as Manufacturer,
         url: v,
       }))
       formEnabled.value = p.is_enabled
@@ -158,8 +159,21 @@ export default defineComponent({
           title: t('provider.baseUrlMap'),
           render: (row) => {
             const entries = Object.entries(row.base_url_map || {})
-            if (entries.length === 0) return '—'
-            return entries.map(([k, v]) => `${k}: ${v}`).join(', ')
+            if (entries.length === 0) return <span class={styles.urlEmpty}>—</span>
+            return (
+              <div class={styles.urlList}>
+                {entries.map(([k, v]) => (
+                  <div key={k} class={styles.urlItem}>
+                    <span class={styles.urlDot} />
+                    <span class={styles.urlManufacturer}>
+                      {ManufacturerLabel[k as keyof typeof ManufacturerLabel] || k}
+                    </span>
+                    <span class={styles.urlSep}>-</span>
+                    <span class={styles.urlValue}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            )
           },
         },
         {
@@ -268,9 +282,9 @@ export default defineComponent({
                             class={styles.baseUrlSelect}
                             value={entry.manufacturer}
                             onChange={(e) => {
-                              formBaseUrlEntries.value[idx].manufacturer = (
+                              formBaseUrlEntries.value[idx]!.manufacturer = (
                                 e.target as HTMLSelectElement
-                              ).value
+                              ).value as Manufacturer
                             }}
                           >
                             {MANUFACTURERS.map((m) => (
@@ -282,7 +296,7 @@ export default defineComponent({
                                   formBaseUrlEntries.value.some((e) => e.manufacturer === m)
                                 }
                               >
-                                {m}
+                                {ManufacturerLabel[m]}
                               </option>
                             ))}
                           </select>
@@ -292,7 +306,7 @@ export default defineComponent({
                             placeholder="https://..."
                             value={entry.url}
                             onInput={(e) => {
-                              formBaseUrlEntries.value[idx].url = (
+                              formBaseUrlEntries.value[idx]!.url = (
                                 e.target as HTMLInputElement
                               ).value
                             }}
@@ -314,7 +328,8 @@ export default defineComponent({
                             const used = new Set(
                               formBaseUrlEntries.value.map((e) => e.manufacturer),
                             )
-                            const next = MANUFACTURERS.find((m) => !used.has(m)) || MANUFACTURERS[0]
+                            const next =
+                              MANUFACTURERS.find((m) => !used.has(m)) ?? MANUFACTURERS[0]!
                             formBaseUrlEntries.value.push({ manufacturer: next, url: '' })
                           }}
                         >

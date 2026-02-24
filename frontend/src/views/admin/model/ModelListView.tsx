@@ -11,6 +11,11 @@ import {
 } from '../../../api/model'
 import { fetchAllProviders, type Provider } from '../../../api/provider'
 import DataTable, { type Column } from '../../../components/DataTable'
+import {
+  Manufacturer,
+  ManufacturerLabel,
+  MANUFACTURERS,
+} from '../../../utils/enums/manufacturer.enum'
 import styles from './model.module.css'
 
 export default defineComponent({
@@ -31,7 +36,7 @@ export default defineComponent({
     const editingModel = ref<Model | null>(null)
     const formName = ref('')
     const formDisplayName = ref('')
-    const formManufacturer = ref('openai')
+    const formManufacturer = ref(Manufacturer.OPENAI)
     const formEnabled = ref(true)
     const formProviderIds = ref<string[]>([])
     const formError = ref('')
@@ -84,7 +89,7 @@ export default defineComponent({
       editingModel.value = null
       formName.value = ''
       formDisplayName.value = ''
-      formManufacturer.value = 'openai'
+      formManufacturer.value = Manufacturer.OPENAI
       formEnabled.value = true
       formProviderIds.value = []
       formError.value = ''
@@ -95,7 +100,7 @@ export default defineComponent({
       editingModel.value = m
       formName.value = m.name
       formDisplayName.value = m.display_name
-      formManufacturer.value = m.manufacturer
+      formManufacturer.value = m.manufacturer as Manufacturer
       formEnabled.value = m.is_enabled
       formProviderIds.value = m.providers.map((p) => p.provider_id)
       formError.value = ''
@@ -174,7 +179,11 @@ export default defineComponent({
       const columns: Column<Model>[] = [
         { key: 'name', title: t('model.modelName') },
         { key: 'display_name', title: t('model.displayName') },
-        { key: 'manufacturer', title: t('model.manufacturer') },
+        {
+          key: 'manufacturer',
+          title: t('model.manufacturer'),
+          render: (row) => ManufacturerLabel[row.manufacturer as Manufacturer] || row.manufacturer,
+        },
         {
           key: 'providers',
           title: t('model.providers'),
@@ -285,11 +294,15 @@ export default defineComponent({
                         class={styles.formInput}
                         value={formManufacturer.value}
                         onChange={(e) =>
-                          (formManufacturer.value = (e.target as HTMLSelectElement).value)
+                          (formManufacturer.value = (e.target as HTMLSelectElement)
+                            .value as Manufacturer)
                         }
                       >
-                        <option value="openai">OpenAI</option>
-                        <option value="anthropic">Anthropic</option>
+                        {MANUFACTURERS.map((m) => (
+                          <option key={m} value={m}>
+                            {ManufacturerLabel[m]}
+                          </option>
+                        ))}
                       </select>
                     </div>
 

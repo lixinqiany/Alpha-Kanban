@@ -380,6 +380,49 @@
   border-radius: 6px;
 }
 
+/* ── URL 列表 ── */
+.urlList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.urlItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.urlDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #0969da;
+  flex-shrink: 0;
+}
+
+.urlManufacturer {
+  font-weight: 600;
+  color: #24292f;
+  flex-shrink: 0;
+}
+
+.urlSep {
+  color: #8c959f;
+  flex-shrink: 0;
+}
+
+.urlValue {
+  color: #656d76;
+  word-break: break-all;
+}
+
+.urlEmpty {
+  color: #8c959f;
+}
+
 /* ── 确认弹窗 ── */
 .confirmText {
   font-size: 14px;
