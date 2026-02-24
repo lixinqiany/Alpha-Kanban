@@ -112,10 +112,7 @@ export default defineComponent({
             </div>
 
             <div class={styles.navRight}>
-              <Dropdown
-                placement="bottom-right"
-                classes={{ dropdown: styles.langDropdown }}
-              >
+              <Dropdown placement="bottom-right" classes={{ dropdown: styles.langDropdown }}>
                 {{
                   trigger: () => (
                     <button class={styles.langBtn} title="Language">
