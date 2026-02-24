@@ -6,7 +6,7 @@ import AdminLayout from '../components/AdminLayout'
 import HomeView from '../views/home/HomeView'
 import OverviewContent from '../views/home/OverviewContent'
 import ProviderListView from '../views/provider/ProviderListView'
-import ProviderModelsView from '../views/provider/ProviderModelsView'
+import ModelListView from '../views/model/ModelListView'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -36,11 +36,7 @@ const router = createRouter({
           children: [
             { path: '', redirect: { name: 'AdminProviderManagement' } },
             { path: 'providers', name: 'AdminProviderManagement', component: ProviderListView },
-            {
-              path: 'providers/:id/models',
-              name: 'AdminProviderModelManagement',
-              component: ProviderModelsView,
-            },
+            { path: 'models', name: 'AdminModelManagement', component: ModelListView },
           ],
         },
       ],

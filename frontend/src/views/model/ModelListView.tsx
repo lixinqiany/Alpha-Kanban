@@ -1,55 +1,52 @@
 import { defineComponent, ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
-  fetchProvider,
   fetchModels,
   createModel,
   updateModel,
   deleteModel,
-  type Provider,
-  type ProviderModel,
+  type Model,
   type ModelCreateData,
   type ModelUpdateData,
-} from '../../api/provider'
+} from '../../api/model'
+import { fetchAllProviders, type Provider } from '../../api/provider'
 import DataTable, { type Column } from '../../components/DataTable'
-import styles from './provider.module.css'
+import styles from './model.module.css'
 
 export default defineComponent({
   setup() {
-    const route = useRoute()
-    const router = useRouter()
     const { t } = useI18n()
-    const providerId = route.params.id as string
-
-    const provider = ref<Provider | null>(null)
-    const models = ref<ProviderModel[]>([])
+    const models = ref<Model[]>([])
     const loading = ref(false)
     const error = ref('')
     const total = ref(0)
     const page = ref(1)
     const pageSize = ref(10)
 
+    // 所有供应商（用于表单多选）
+    const allProviders = ref<Provider[]>([])
+
     // Modal 状态
     const showFormModal = ref(false)
-    const editingModel = ref<ProviderModel | null>(null)
+    const editingModel = ref<Model | null>(null)
     const formName = ref('')
     const formDisplayName = ref('')
     const formManufacturer = ref('openai')
     const formEnabled = ref(true)
+    const formProviderIds = ref<string[]>([])
     const formError = ref('')
     const formLoading = ref(false)
 
     // 删除确认
     const showDeleteModal = ref(false)
-    const deletingModel = ref<ProviderModel | null>(null)
+    const deletingModel = ref<Model | null>(null)
     const deleteLoading = ref(false)
 
     async function loadModels() {
       loading.value = true
       error.value = ''
       try {
-        const res = await fetchModels(providerId, page.value, pageSize.value)
+        const res = await fetchModels(page.value, pageSize.value)
         models.value = res.items
         total.value = res.total
       } catch {
@@ -59,25 +56,18 @@ export default defineComponent({
       }
     }
 
-    async function loadData() {
-      loading.value = true
-      error.value = ''
+    async function loadProviders() {
       try {
-        const [p, m] = await Promise.all([
-          fetchProvider(providerId),
-          fetchModels(providerId, page.value, pageSize.value),
-        ])
-        provider.value = p
-        models.value = m.items
-        total.value = m.total
+        allProviders.value = await fetchAllProviders()
       } catch {
-        error.value = t('model.loadDataFailed')
-      } finally {
-        loading.value = false
+        // 静默处理
       }
     }
 
-    onMounted(loadData)
+    onMounted(() => {
+      loadModels()
+      loadProviders()
+    })
 
     function onPageChange(p: number) {
       page.value = p
@@ -96,18 +86,29 @@ export default defineComponent({
       formDisplayName.value = ''
       formManufacturer.value = 'openai'
       formEnabled.value = true
+      formProviderIds.value = []
       formError.value = ''
       showFormModal.value = true
     }
 
-    function openEdit(m: ProviderModel) {
+    function openEdit(m: Model) {
       editingModel.value = m
       formName.value = m.name
       formDisplayName.value = m.display_name
       formManufacturer.value = m.manufacturer
       formEnabled.value = m.is_enabled
+      formProviderIds.value = m.providers.map((p) => p.provider_id)
       formError.value = ''
       showFormModal.value = true
+    }
+
+    function toggleProvider(providerId: string) {
+      const idx = formProviderIds.value.indexOf(providerId)
+      if (idx >= 0) {
+        formProviderIds.value.splice(idx, 1)
+      } else {
+        formProviderIds.value.push(providerId)
+      }
     }
 
     async function handleFormSubmit(e: Event) {
@@ -123,6 +124,7 @@ export default defineComponent({
           if (formManufacturer.value !== editingModel.value.manufacturer)
             payload.manufacturer = formManufacturer.value
           payload.is_enabled = formEnabled.value
+          payload.provider_ids = formProviderIds.value
           await updateModel(editingModel.value.id, payload)
         } else {
           if (!formName.value || !formDisplayName.value) {
@@ -135,19 +137,21 @@ export default defineComponent({
             display_name: formDisplayName.value,
             manufacturer: formManufacturer.value,
             is_enabled: formEnabled.value,
+            provider_ids: formProviderIds.value,
           }
-          await createModel(providerId, payload)
+          await createModel(payload)
         }
         showFormModal.value = false
         await loadModels()
-      } catch (e: any) {
-        formError.value = e.response?.data?.detail || t('common.operationFailed')
+      } catch (e: unknown) {
+        const err = e as { response?: { data?: { detail?: string } } }
+        formError.value = err.response?.data?.detail || t('common.operationFailed')
       } finally {
         formLoading.value = false
       }
     }
 
-    function openDelete(m: ProviderModel) {
+    function openDelete(m: Model) {
       deletingModel.value = m
       showDeleteModal.value = true
     }
@@ -167,10 +171,19 @@ export default defineComponent({
     }
 
     return () => {
-      const columns: Column<ProviderModel>[] = [
+      const columns: Column<Model>[] = [
         { key: 'name', title: t('model.modelName') },
         { key: 'display_name', title: t('model.displayName') },
         { key: 'manufacturer', title: t('model.manufacturer') },
+        {
+          key: 'providers',
+          title: t('model.providers'),
+          render: (row) => {
+            if (row.providers.length === 0)
+              return <span style={{ color: '#656d76' }}>{t('model.noProviders')}</span>
+            return row.providers.map((p) => p.provider_name).join(', ')
+          },
+        },
         {
           key: 'is_enabled',
           title: t('provider.status'),
@@ -201,42 +214,6 @@ export default defineComponent({
 
       return (
         <div class={styles.page}>
-          {/* 面包屑 */}
-          <div class={styles.breadcrumb}>
-            <span
-              class={styles.breadcrumbLink}
-              onClick={() => router.push({ name: 'AdminProviderManagement' })}
-            >
-              {t('provider.title')}
-            </span>
-            <span class={styles.breadcrumbSep}>/</span>
-            <span>{provider.value?.name || '...'}</span>
-          </div>
-
-          {/* 供应商摘要 */}
-          {provider.value && (
-            <div class={styles.summaryCard}>
-              <h2 class={styles.summaryName}>{provider.value.name}</h2>
-              <div class={styles.summaryMeta}>
-                {Object.keys(provider.value.base_url_map || {}).length > 0
-                  ? Object.entries(provider.value.base_url_map)
-                      .map(([k, v]) => `${k}: ${v}`)
-                      .join(' · ')
-                  : t('model.noBaseUrl')}
-                {' · '}
-                <span
-                  class={[
-                    styles.status,
-                    provider.value.is_enabled ? styles.statusEnabled : styles.statusDisabled,
-                  ]}
-                >
-                  <span class={styles.statusDot}></span>
-                  {provider.value.is_enabled ? t('common.enabled') : t('common.disabled')}
-                </span>
-              </div>
-            </div>
-          )}
-
           <div class={styles.header}>
             <h1 class={styles.title}>{t('model.title')}</h1>
             <button class={styles.btnPrimary} onClick={openCreate}>
@@ -314,6 +291,26 @@ export default defineComponent({
                         <option value="openai">OpenAI</option>
                         <option value="anthropic">Anthropic</option>
                       </select>
+                    </div>
+
+                    <div class={styles.formGroup}>
+                      <label class={styles.formLabel}>{t('model.selectProviders')}</label>
+                      {allProviders.value.length === 0 ? (
+                        <div class={styles.noProviders}>{t('model.noProviders')}</div>
+                      ) : (
+                        <div class={styles.checkboxGroup}>
+                          {allProviders.value.map((p) => (
+                            <label key={p.id} class={styles.formCheckbox}>
+                              <input
+                                type="checkbox"
+                                checked={formProviderIds.value.includes(p.id)}
+                                onChange={() => toggleProvider(p.id)}
+                              />
+                              {p.name}
+                            </label>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div class={styles.formGroup}>

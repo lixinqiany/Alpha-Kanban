@@ -22,6 +22,12 @@ export default defineComponent({
           >
             {t('admin.providers')}
           </RouterLink>
+          <RouterLink
+            to={{ name: 'AdminModelManagement' }}
+            class={[styles.menuItem, isActive('/admin/models') && styles.menuItemActive]}
+          >
+            {t('admin.models')}
+          </RouterLink>
         </aside>
         <div class={styles.content}>
           <RouterView />

@@ -6,10 +6,11 @@ export default {
   modelName: 'Model Name',
   displayName: 'Display Name',
   manufacturer: 'Manufacturer',
+  providers: 'Providers',
+  noProviders: 'No providers',
+  selectProviders: 'Select providers',
   loadFailed: 'Failed to load models',
-  loadDataFailed: 'Failed to load data',
   nameAndDisplayRequired: 'Model name and display name are required',
   deleteConfirm: 'Are you sure you want to delete model',
   deleteWarning: '? This action cannot be undone.',
-  noBaseUrl: 'No base URL set',
 }

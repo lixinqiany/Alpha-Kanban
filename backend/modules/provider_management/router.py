@@ -11,21 +11,15 @@ from modules.provider_management.schema import (
     ProviderCreateRequest,
     ProviderUpdateRequest,
     ProviderResponse,
-    ModelCreateRequest,
-    ModelUpdateRequest,
-    ModelResponse,
 )
 from utils.pagination import PaginatedResponse
 from modules.provider_management.service import (
     list_providers,
+    list_all_providers,
     get_provider,
     create_provider,
     update_provider,
     delete_provider,
-    list_models,
-    create_model,
-    update_model,
-    delete_model,
 )
 
 router = APIRouter(
@@ -44,6 +38,13 @@ async def api_list_providers(
     session: AsyncSession = Depends(get_postgres_session),
 ):
     return await list_providers(session, page, page_size)
+
+
+@router.get("/providers/all", response_model=list[ProviderResponse])
+async def api_list_all_providers(
+    session: AsyncSession = Depends(get_postgres_session),
+):
+    return await list_all_providers(session)
 
 
 @router.get("/providers/{provider_id}", response_model=ProviderResponse)
@@ -82,46 +83,3 @@ async def api_delete_provider(
 ):
     await delete_provider(session, provider_id)
     logger.info("供应商删除成功: id={}", provider_id)
-
-
-# ── Model 路由 ──
-
-@router.get("/providers/{provider_id}/models", response_model=PaginatedResponse[ModelResponse])
-async def api_list_models(
-    provider_id: uuid.UUID,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(get_postgres_session),
-):
-    return await list_models(session, provider_id, page, page_size)
-
-
-@router.post("/providers/{provider_id}/models", response_model=ModelResponse, status_code=201)
-async def api_create_model(
-    provider_id: uuid.UUID,
-    data: ModelCreateRequest,
-    session: AsyncSession = Depends(get_postgres_session),
-):
-    model = await create_model(session, provider_id, data)
-    logger.info("模型创建成功: name={}, id={}", model.name, model.id)
-    return model
-
-
-@router.put("/models/{model_id}", response_model=ModelResponse)
-async def api_update_model(
-    model_id: uuid.UUID,
-    data: ModelUpdateRequest,
-    session: AsyncSession = Depends(get_postgres_session),
-):
-    model = await update_model(session, model_id, data)
-    logger.info("模型更新成功: id={}", model.id)
-    return model
-
-
-@router.delete("/models/{model_id}", status_code=204)
-async def api_delete_model(
-    model_id: uuid.UUID,
-    session: AsyncSession = Depends(get_postgres_session),
-):
-    await delete_model(session, model_id)
-    logger.info("模型删除成功: id={}", model_id)

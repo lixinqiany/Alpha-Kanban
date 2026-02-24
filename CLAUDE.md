@@ -74,7 +74,8 @@ frontend/src/
 ├── views/             # 页面视图，按功能分组
 │   ├── auth/          # 登录 / 注册
 │   ├── home/          # 首页仪表盘（概览 + 活动）
-│   └── provider/      # 供应商 / 模型管理
+│   ├── provider/      # 供应商管理
+│   └── model/         # 模型管理（独立，M:N 关联供应商）
 └── router/            # Vue Router 路由定义 + 导航守卫
 ```
 
@@ -93,7 +94,11 @@ User (users)
  └── role: admin | user（UserRole 枚举，默认 user）
 
 Provider (providers)
- └──1:N── Model (models)                    provider_id FK → providers.id (CASCADE)
+ └──M:N── Model (models)                    via model_provider_links (model_id, provider_id)
+
+ModelProviderLink (model_provider_links)
+ ├── model_id FK → models.id (CASCADE)
+ └── provider_id FK → providers.id (CASCADE)
 ```
 
 ### 约束与索引
@@ -102,7 +107,9 @@ Provider (providers)
 |---|---|
 | users | username UNIQUE |
 | providers | name UNIQUE |
-| models | (provider_id, name) UNIQUE |
+| models | name UNIQUE |
+| model_provider_links | (model_id, provider_id) UNIQUE |
+| model_provider_links | INDEX (model_id), INDEX (provider_id) |
 | messages | (conversation_id, order) UNIQUE |
 | conversations | INDEX (user_id, last_chat_time) |
 | messages | INDEX (user_id) |
@@ -121,9 +128,12 @@ POST /api/user/register | login | refresh | logout
 
 # 供应商管理（需要 admin 角色）
 GET|POST   /api/provider-management/providers
+GET        /api/provider-management/providers/all
 GET|PUT|DELETE /api/provider-management/providers/{id}
-GET|POST   /api/provider-management/providers/{id}/models
-PUT|DELETE /api/provider-management/models/{model_id}
+
+# 模型管理（需要 admin 角色）
+GET|POST   /api/model-management/models
+PUT|DELETE /api/model-management/models/{model_id}
 ```
 
 分页接口统一使用 `page`（1-based）和 `page_size`（默认 10，最大 100）查询参数。
@@ -140,10 +150,10 @@ PUT|DELETE /api/provider-management/models/{model_id}
     │   └── /activity         ActivityContent    （活动记录，占位中）
     └── /admin [AdminLayout]                     （管理后台侧边栏布局）
         ├── /providers        ProviderListView   （供应商 CRUD + 分页）
-        └── /providers/:id/models ProviderModelsView（模型 CRUD + 分页）
+        └── /models           ModelListView      （模型 CRUD + 供应商多选 + 分页）
 ```
 
-命名路由：`Login` / `Register` / `Home` / `HomeActivity` / `AdminProviderManagement` / `AdminProviderModelManagement`
+命名路由：`Login` / `Register` / `Home` / `HomeActivity` / `AdminProviderManagement` / `AdminModelManagement`
 
 ## Utils
 
@@ -187,7 +197,7 @@ PUT|DELETE /api/provider-management/models/{model_id}
 - `components/` 每个组件同名文件夹，`index.tsx` 作为入口
 - 布局层级：`AppLayout`（主框架）→ 页面 / `AdminLayout`（管理后台）→ 子页面
 - `api/client.ts` 提供 `publicClient`（无鉴权）和 `authClient`（自动注入 Bearer Token + 401 静默刷新）
-- `api/<domain>.ts` 封装业务接口 + TS 类型定义（当前：`user.ts`、`provider.ts`）
+- `api/<domain>.ts` 封装业务接口 + TS 类型定义（当前：`user.ts`、`provider.ts`、`model.ts`）
 - Vite 开发环境 `/api` 代理到 `VITE_API_BASE_URL`（默认 `http://localhost:8000`）
 - 令牌存 `localStorage`（`access_token` / `refresh_token`）
 - 导航守卫：未登录跳转 `/login`，已登录访问公开页跳转 `/home`
@@ -228,7 +238,7 @@ PUT|DELETE /api/provider-management/models/{model_id}
 | 供应商 CRUD | ✅ | ✅ | 完成 |
 | 模型 CRUD | ✅ | ✅ | 完成 |
 | 主布局 + 导航 + 仪表盘 | — | ✅ | 完成 |
-| AI 聊天 | 模型已建 | — | 待开发 |
+| AI 聊天 | ✅ | — | 后端完成 |
 | 看板管理 | — | — | 待开发 |
 | 金融行情分析 | — | — | 待开发 |
 

@@ -6,10 +6,11 @@ export default {
   modelName: '模型名称',
   displayName: '显示名称',
   manufacturer: '原厂商',
+  providers: '供应商',
+  noProviders: '无供应商',
+  selectProviders: '选择供应商',
   loadFailed: '加载模型列表失败',
-  loadDataFailed: '加载数据失败',
   nameAndDisplayRequired: '模型名称和显示名称为必填项',
   deleteConfirm: '确定要删除模型',
   deleteWarning: '吗？此操作不可撤销。',
-  noBaseUrl: '未设置 Base URL',
 }

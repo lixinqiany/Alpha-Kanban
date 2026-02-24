@@ -1,8 +1,8 @@
-"""add user role and seed admin
+"""create users table
 
-Revision ID: a3f1b2c4d5e6
-Revises: ec1e6cd7a1eb
-Create Date: 2026-02-22 20:00:00.000000
+Revision ID: 0001
+Revises:
+Create Date: 2026-02-19 00:32:25.335340
 
 """
 import uuid
@@ -13,18 +13,22 @@ from alembic import op
 import sqlalchemy as sa
 
 
-# revision identifiers, used by Alembic.
-revision: str = 'a3f1b2c4d5e6'
-down_revision: Union[str, Sequence[str], None] = 'ec1e6cd7a1eb'
+revision: str = '0001'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 添加 role 列，默认值为 'user'
-    op.add_column(
-        'users',
+    op.create_table('users',
+        sa.Column('username', sa.String(length=50), nullable=False),
+        sa.Column('password_hash', sa.String(length=128), nullable=False),
         sa.Column('role', sa.String(length=20), server_default='user', nullable=False),
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('username'),
     )
 
     # 内置管理员账户
@@ -44,8 +48,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # 删除内置管理员（如果存在）
-    op.execute(
-        sa.text("DELETE FROM users WHERE username = 'admin' AND role = 'admin'")
-    )
-    op.drop_column('users', 'role')
+    op.drop_table('users')

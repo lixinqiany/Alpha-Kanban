@@ -14,6 +14,5 @@ export default {
   loadFailed: 'Failed to load providers',
   nameAndKeyRequired: 'Name and API Key are required',
   deleteConfirm: 'Are you sure you want to delete',
-  deleteProviderWarning:
-    '? This will also delete all associated models. This action cannot be undone.',
+  deleteProviderWarning: '? This action cannot be undone.',
 }

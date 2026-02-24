@@ -14,5 +14,5 @@ export default {
   loadFailed: '加载供应商列表失败',
   nameAndKeyRequired: '名称和 API Key 为必填项',
   deleteConfirm: '确定要删除',
-  deleteProviderWarning: '吗？这将同时删除所有关联的模型。此操作不可撤销。',
+  deleteProviderWarning: '吗？此操作不可撤销。',
 }

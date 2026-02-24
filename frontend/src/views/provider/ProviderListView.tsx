@@ -1,5 +1,4 @@
 import { defineComponent, ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   fetchProviders,
@@ -15,7 +14,6 @@ import styles from './provider.module.css'
 
 export default defineComponent({
   setup() {
-    const router = useRouter()
     const { t } = useI18n()
     const providers = ref<Provider[]>([])
     const loading = ref(false)
@@ -183,14 +181,6 @@ export default defineComponent({
             <div class={styles.btnGroup}>
               <button class={styles.btnSecondary} onClick={() => openEdit(row)}>
                 {t('common.edit')}
-              </button>
-              <button
-                class={styles.btnSecondary}
-                onClick={() =>
-                  router.push({ name: 'AdminProviderModelManagement', params: { id: row.id } })
-                }
-              >
-                {t('model.title')}
               </button>
               <button class={styles.btnDanger} onClick={() => openDelete(row)}>
                 {t('common.delete')}

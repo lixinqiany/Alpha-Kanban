@@ -15,7 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from models.conversation import Conversation, Message, MessageRole, MessageStatus
-from models.provider import Model as ProviderModel, Provider
+from models.model import Model
+from models.model_provider_link import ModelProviderLink
+from models.provider import Provider
 from modules.llm.adapter import ChunkType, LLMConfig, LLMMessage
 from modules.llm.registry import get_adapter
 from utils.pagination import PaginatedResponse, paginate
@@ -208,28 +210,32 @@ async def _get_user_conversation(
 async def _resolve_model(
     session: AsyncSession,
     model_name: str,
-) -> tuple[ProviderModel, Provider]:
-    """按模型名称查找第一个启用的模型+供应商组合
+) -> tuple[Model, Provider]:
+    """通过 ModelProviderLink 查找第一个启用的模型+供应商组合
 
     TODO: 同名模型存在多个供应商时，可扩展为负载均衡策略
     """
     result = await session.execute(
-        select(ProviderModel)
-        .options(joinedload(ProviderModel.provider))
-        .where(
-            ProviderModel.name == model_name,
-            ProviderModel.is_enabled.is_(True),
+        select(ModelProviderLink)
+        .options(
+            joinedload(ModelProviderLink.model),
+            joinedload(ModelProviderLink.provider),
         )
+        .join(Model)
+        .where(
+            Model.name == model_name,
+            Model.is_enabled.is_(True),
+        )
+        .join(Provider)
+        .where(Provider.is_enabled.is_(True))
+        .where(ModelProviderLink.is_enabled.is_(True))
     )
-    models = result.scalars().all()
+    links = result.unique().scalars().all()
 
-    # 过滤出供应商也启用的
-    available = [m for m in models if m.provider.is_enabled]
-
-    if not available:
+    if not links:
         raise HTTPException(status_code=404, detail=f"无可用模型: {model_name}")
 
-    return available[0], available[0].provider
+    return links[0].model, links[0].provider
 
 
 async def _get_next_order(
