@@ -8,8 +8,8 @@ import {
   type Provider,
   type ProviderCreateData,
   type ProviderUpdateData,
-} from '../../api/provider'
-import DataTable, { type Column } from '../../components/DataTable'
+} from '../../../api/provider'
+import DataTable, { type Column } from '../../../components/DataTable'
 import styles from './provider.module.css'
 
 export default defineComponent({

@@ -5,8 +5,8 @@ import AppLayout from '../components/AppLayout'
 import AdminLayout from '../components/AdminLayout'
 import HomeView from '../views/home/HomeView'
 import OverviewContent from '../views/home/OverviewContent'
-import ProviderListView from '../views/provider/ProviderListView'
-import ModelListView from '../views/model/ModelListView'
+import ProviderListView from '../views/admin/provider/ProviderListView'
+import ModelListView from '../views/admin/model/ModelListView'
 const router = createRouter({
   history: createWebHistory(),
   routes: [

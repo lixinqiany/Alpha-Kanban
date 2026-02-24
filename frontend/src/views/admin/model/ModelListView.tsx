@@ -8,9 +8,9 @@ import {
   type Model,
   type ModelCreateData,
   type ModelUpdateData,
-} from '../../api/model'
-import { fetchAllProviders, type Provider } from '../../api/provider'
-import DataTable, { type Column } from '../../components/DataTable'
+} from '../../../api/model'
+import { fetchAllProviders, type Provider } from '../../../api/provider'
+import DataTable, { type Column } from '../../../components/DataTable'
 import styles from './model.module.css'
 
 export default defineComponent({
