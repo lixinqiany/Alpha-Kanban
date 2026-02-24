@@ -1,4 +1,4 @@
-import { defineComponent, type PropType, type VNode } from 'vue'
+import { defineComponent, getCurrentInstance, type PropType, type VNode } from 'vue'
 import styles from './FeatureCard.module.css'
 
 export type TagVariant = 'blue' | 'green' | 'orange' | 'purple' | 'red'
@@ -37,8 +37,9 @@ export default defineComponent({
     },
   },
   emits: ['click'],
-  setup(props, { slots, emit, attrs }) {
-    const hasClickListener = () => 'onClick' in attrs
+  setup(props, { slots, emit }) {
+    const instance = getCurrentInstance()
+    const hasClickListener = () => !!instance?.vnode.props?.onClick
 
     return () => {
       const iconNode = props.icon ?? slots.icon?.()
