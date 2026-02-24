@@ -27,6 +27,11 @@ const router = createRouter({
           children: [{ path: '', name: 'Home', component: OverviewContent }],
         },
         {
+          path: 'chat',
+          name: 'Chat',
+          component: () => import('../views/chat/ChatView.tsx'),
+        },
+        {
           path: 'admin',
           component: AdminLayout,
           children: [

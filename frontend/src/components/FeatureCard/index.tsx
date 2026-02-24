@@ -1,11 +1,27 @@
 import { defineComponent, type PropType, type VNode } from 'vue'
 import styles from './FeatureCard.module.css'
 
+export type TagVariant = 'blue' | 'green' | 'orange' | 'purple' | 'red'
+
+export interface TagItem {
+  label: string
+  variant?: TagVariant
+}
+
+const variantClassMap: Record<TagVariant, string | undefined> = {
+  blue: styles.tagBlue,
+  green: styles.tagGreen,
+  orange: styles.tagOrange,
+  purple: styles.tagPurple,
+  red: styles.tagRed,
+}
+
 export default defineComponent({
   name: 'FeatureCard',
   props: {
     icon: {
       type: Object as PropType<VNode>,
+      required: true,
     },
     title: {
       type: String,
@@ -15,12 +31,9 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    tag: {
-      type: String,
-    },
-    tagVariant: {
-      type: String as PropType<'success' | 'warning'>,
-      default: 'warning',
+    tags: {
+      type: Array as PropType<TagItem[]>,
+      default: () => [],
     },
   },
   emits: ['click'],
@@ -30,8 +43,6 @@ export default defineComponent({
     return () => {
       const iconNode = props.icon ?? slots.icon?.()
 
-      const tagVariantClass = props.tagVariant === 'success' ? styles.tagSuccess : styles.tagWarning
-
       return (
         <div
           class={[styles.card, hasClickListener() && styles.clickable]}
@@ -40,7 +51,18 @@ export default defineComponent({
           {iconNode && <div class={styles.cardIcon}>{iconNode}</div>}
           <h3 class={styles.cardTitle}>{props.title}</h3>
           <p class={styles.cardDesc}>{props.description}</p>
-          {props.tag && <span class={[styles.cardTag, tagVariantClass]}>{props.tag}</span>}
+          {props.tags.length > 0 && (
+            <div class={styles.cardTags}>
+              {props.tags.map((tag) => (
+                <span
+                  key={tag.label}
+                  class={[styles.cardTag, variantClassMap[tag.variant ?? 'blue']]}
+                >
+                  {tag.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )
     }

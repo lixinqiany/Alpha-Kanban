@@ -1,33 +1,18 @@
 import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
+import type { TagItem } from '../../components/FeatureCard'
 import FeatureCard from '../../components/FeatureCard'
 import styles from './home.module.css'
 
-const features = [
-  {
-    icon: <span>📋</span>,
-    title: 'Kanban Board',
-    description: 'Organize your tasks with a visual drag-and-drop kanban board.',
-    tag: 'Coming soon',
-    tagVariant: 'warning' as const,
-  },
-  {
-    icon: <span>💬</span>,
-    title: 'AI Chat',
-    description: 'Chat with AI models to get help with your work and brainstorming.',
-    tag: 'Coming soon',
-    tagVariant: 'warning' as const,
-  },
-  {
-    icon: <span>📈</span>,
-    title: 'Financial Analysis',
-    description: 'AI-powered financial market analysis and insights.',
-    tag: 'Coming soon',
-    tagVariant: 'warning' as const,
-  },
-]
-
 export default defineComponent({
   setup() {
+    const router = useRouter()
+
+    const handleChatClick = () => {
+      // TODO: 导航到 AI Chat 页面
+      router.push('/chat')
+    }
+
     return () => (
       <div class={styles.page}>
         <h1 class={styles.welcome}>Welcome to Alpha-Kanban</h1>
@@ -36,16 +21,18 @@ export default defineComponent({
         </p>
 
         <div class={styles.grid}>
-          {features.map((f) => (
-            <FeatureCard
-              key={f.title}
-              icon={f.icon}
-              title={f.title}
-              description={f.description}
-              tag={f.tag}
-              tagVariant={f.tagVariant}
-            />
-          ))}
+          <FeatureCard
+            icon={<span>💬</span>}
+            title="General AI Chat"
+            description="Chat with AI models to get help with your work and brainstorming."
+            tags={
+              [
+                { label: 'ChatGPT', variant: 'green' },
+                { label: 'Anthropic', variant: 'orange' },
+              ] as TagItem[]
+            }
+            onClick={handleChatClick}
+          />
         </div>
       </div>
     )

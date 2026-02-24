@@ -32,21 +32,43 @@
   line-height: 1.5;
 }
 
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
 .cardTag {
   display: inline-block;
-  margin-top: 12px;
   padding: 2px 8px;
   font-size: 12px;
   font-weight: 500;
   border-radius: 12px;
 }
 
-.tagSuccess {
+/* Tag 颜色变体 */
+.tagBlue {
+  color: #0969da;
+  background-color: #ddf4ff;
+}
+
+.tagGreen {
   color: #1a7f37;
   background-color: #dafbe1;
 }
 
-.tagWarning {
+.tagOrange {
   color: #9a6700;
   background-color: #fff8c5;
+}
+
+.tagPurple {
+  color: #8250df;
+  background-color: #fbefff;
+}
+
+.tagRed {
+  color: #cf222e;
+  background-color: #ffebe9;
 }
