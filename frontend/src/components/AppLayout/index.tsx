@@ -2,8 +2,11 @@ import { defineComponent, ref } from 'vue'
 import { RouterView, RouterLink, useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getCurrentUser, isAdmin } from '../../utils/token'
-import { toggleLocale, getLocale } from '../../utils/locale'
+import { setLocale, getLocale } from '../../utils/locale'
+import type { SupportedLocale } from '../../utils/locale'
 import Dropdown from '../Dropdown'
+import SvgIcon from '../SvgIcon'
+import TranslateIcon from '../../assets/icons/translate.svg?component'
 import styles from './AppLayout.module.css'
 
 interface TabItem {
@@ -109,13 +112,50 @@ export default defineComponent({
             </div>
 
             <div class={styles.navRight}>
-              <button
-                class={[styles.langBtn, getLocale() === 'zh-CN' ? styles.langZh : styles.langEn]}
-                onClick={toggleLocale}
-                title={getLocale() === 'zh-CN' ? 'Switch to English' : '切换到中文'}
+              <Dropdown
+                placement="bottom-right"
+                classes={{ dropdown: styles.langDropdown }}
               >
-                <span class={styles.langLabel}>{getLocale() === 'zh-CN' ? '中' : 'EN'}</span>
-              </button>
+                {{
+                  trigger: () => (
+                    <button class={styles.langBtn} title="Language">
+                      <SvgIcon icon={TranslateIcon} size={16} />
+                    </button>
+                  ),
+                  default: () => (
+                    <>
+                      {(
+                        [
+                          { locale: 'zh-CN' as SupportedLocale, label: '简体中文' },
+                          { locale: 'en-US' as SupportedLocale, label: 'English' },
+                        ] as const
+                      ).map((item) => (
+                        <button
+                          class={[
+                            styles.dropdownItem,
+                            styles.langOption,
+                            getLocale() === item.locale && styles.langOptionActive,
+                          ]}
+                          onClick={() => setLocale(item.locale)}
+                        >
+                          {item.label}
+                          {getLocale() === item.locale && (
+                            <svg
+                              class={styles.langCheck}
+                              width="14"
+                              height="14"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                            >
+                              <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  ),
+                }}
+              </Dropdown>
               <Dropdown placement="bottom-right">
                 {{
                   trigger: () => <button class={styles.avatarBtn}>{initial}</button>,

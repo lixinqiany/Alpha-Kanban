@@ -171,49 +171,52 @@
   gap: 8px;
 }
 
-/* ── 语言切换半月亮 toggle ── */
+/* ── 语言切换按钮 ── */
 .langBtn {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   padding: 0;
-  border: none;
-  border-radius: 50%;
+  background: none;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
   cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #656d76;
+  transition: background-color 0.1s, color 0.1s;
 }
 
 .langBtn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-color: #f6f8fa;
+  color: #1f2328;
 }
 
-.langBtn:active {
-  transform: scale(0.95);
+/* ── 语言下拉面板 ── */
+.langDropdown {
+  min-width: 120px;
+  max-width: 150px;
 }
 
-/* 中文激活：蓝色左半 + 浅色右半 */
-.langZh {
-  background: linear-gradient(90deg, #0969da 50%, #d1d9e0 50%);
+/* ── 语言下拉选项 ── */
+.langOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* 英文激活：浅色左半 + 紫色右半 */
-.langEn {
-  background: linear-gradient(90deg, #d1d9e0 50%, #8250df 50%);
+.langOptionActive {
+  color: #0969da;
+  font-weight: 600;
 }
 
-.langLabel {
-  position: relative;
-  z-index: 1;
-  font-size: 11px;
-  font-weight: 700;
+.langOptionActive:hover {
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  pointer-events: none;
+}
+
+.langCheck {
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .avatarBtn {
