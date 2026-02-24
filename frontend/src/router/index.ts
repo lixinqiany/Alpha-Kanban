@@ -7,7 +7,6 @@ import HomeView from '../views/home/HomeView'
 import OverviewContent from '../views/home/OverviewContent'
 import ProviderListView from '../views/provider/ProviderListView'
 import ProviderModelsView from '../views/provider/ProviderModelsView'
-
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -22,7 +21,7 @@ const router = createRouter({
           path: 'home',
           component: HomeView,
           meta: {
-            tabs: [{ label: 'Overview', to: '/home' }],
+            tabs: [{ labelKey: 'nav.overview', to: '/home' }],
           },
           children: [{ path: '', name: 'Home', component: OverviewContent }],
         },

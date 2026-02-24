@@ -1,0 +1,13 @@
+export default {
+  save: '保存',
+  saving: '保存中...',
+  cancel: '取消',
+  delete: '删除',
+  deleting: '删除中...',
+  edit: '编辑',
+  enabled: '已启用',
+  disabled: '已禁用',
+  loading: '加载中...',
+  noData: '暂无数据',
+  operationFailed: '操作失败',
+}

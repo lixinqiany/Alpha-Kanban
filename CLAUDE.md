@@ -65,7 +65,12 @@ frontend/src/
 │   ├── Dropdown/      # 下拉菜单（支持四方向定位、点击外部关闭）
 │   ├── FeatureCard/   # 功能卡片展示（图标 + 标题 + 描述 + 标签）
 │   └── SvgIcon/       # SVG 图标封装（尺寸、颜色可定制）
-├── utils/             # 工具函数（token.ts：JWT 解析、用户信息、角色判断）
+├── i18n/              # 国际化（vue-i18n，中英双语）
+│   ├── index.ts       # i18n 实例创建与配置
+│   └── locales/       # 按语言 + 模块拆分的翻译文件
+│       ├── zh-CN/     # 中文翻译（common / nav / auth / home / provider / model / chat / table / admin + index 聚合）
+│       └── en-US/     # 英文翻译（同上结构）
+├── utils/             # 工具函数（token.ts：JWT 解析、用户信息、角色判断；locale.ts：语言切换）
 ├── views/             # 页面视图，按功能分组
 │   ├── auth/          # 登录 / 注册
 │   ├── home/          # 首页仪表盘（概览 + 活动）
@@ -186,6 +191,17 @@ PUT|DELETE /api/provider-management/models/{model_id}
 - Vite 开发环境 `/api` 代理到 `VITE_API_BASE_URL`（默认 `http://localhost:8000`）
 - 令牌存 `localStorage`（`access_token` / `refresh_token`）
 - 导航守卫：未登录跳转 `/login`，已登录访问公开页跳转 `/home`
+- **i18n 国际化**：使用 `vue-i18n`（Composition API 模式），支持中文（`zh-CN`）和英文（`en-US`）
+  - 语言优先级：localStorage `locale` > 浏览器语言 > `en-US` 兜底
+  - 翻译 key 按模块组织：`common.` / `nav.` / `auth.` / `home.` / `provider.` / `model.` / `chat.` / `table.` / `admin.`
+  - 组件中使用：`const { t } = useI18n()`，模板中 `{t('module.key')}`
+  - **翻译文件按模块拆分**：每个模块一个文件，存放在 `i18n/locales/<lang>/<module>.ts`
+    - 模块文件只导出该模块的 key（不含模块前缀），如 `locales/zh-CN/common.ts` 导出 `{ save: '保存', ... }`
+    - 聚合文件 `locales/<lang>/index.ts` 导入所有模块并以模块名为 key 导出
+    - 新增用户可见文本时，需同步更新 `locales/zh-CN/<module>.ts` 和 `locales/en-US/<module>.ts`
+    - 新增翻译模块时，需在两个语言的聚合文件 `index.ts` 中注册
+  - 语言切换工具：`utils/locale.ts` 提供 `setLocale()` / `getLocale()` / `toggleLocale()` + `LOCALE_KEY` 常量
+  - `AppLayout` 导航栏包含半月亮风格语言切换按钮（蓝色=中文，紫色=英文）
 
 ### Lifecycle Management
 
@@ -200,7 +216,7 @@ PUT|DELETE /api/provider-management/models/{model_id}
 ### 关键依赖
 
 - **后端**：FastAPI + SQLAlchemy 2.0 + asyncpg + redis + PyJWT + bcrypt + loguru + openai + anthropic
-- **前端**：Vue 3.5 + TypeScript 5.9 + Vite 7 + Vue Router 5 + Axios
+- **前端**：Vue 3.5 + TypeScript 5.9 + Vite 7 + Vue Router 5 + Axios + vue-i18n
 
 ### 功能进度
 

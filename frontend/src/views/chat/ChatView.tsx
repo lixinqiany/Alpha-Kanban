@@ -1,4 +1,5 @@
 import { defineComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import styles from './chat.module.css'
 
 // 模拟会话列表
@@ -25,6 +26,7 @@ const mockMessages = [
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n()
     const activeConversationId = ref('1')
     const inputText = ref('')
 
@@ -33,7 +35,7 @@ export default defineComponent({
         {/* 左侧会话列表侧边栏 */}
         <aside class={styles.sidebar}>
           <div class={styles.sidebarHeader}>
-            <button class={styles.newChatButton}>+ New chat</button>
+            <button class={styles.newChatButton}>{t('chat.newChat')}</button>
           </div>
           <div class={styles.conversationList}>
             {mockConversations.map((conv) => (
@@ -89,7 +91,7 @@ export default defineComponent({
               <textarea
                 class={styles.textarea}
                 rows={1}
-                placeholder="Send a message..."
+                placeholder={t('chat.placeholder')}
                 value={inputText.value}
                 onInput={(e) => (inputText.value = (e.target as HTMLTextAreaElement).value)}
               />

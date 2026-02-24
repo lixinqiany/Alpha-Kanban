@@ -1,5 +1,6 @@
 import { defineComponent, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   fetchProviders,
   createProvider,
@@ -15,6 +16,7 @@ import styles from './provider.module.css'
 export default defineComponent({
   setup() {
     const router = useRouter()
+    const { t } = useI18n()
     const providers = ref<Provider[]>([])
     const loading = ref(false)
     const error = ref('')
@@ -45,7 +47,7 @@ export default defineComponent({
         providers.value = res.items
         total.value = res.total
       } catch {
-        error.value = '加载供应商列表失败'
+        error.value = t('provider.loadFailed')
       } finally {
         loading.value = false
       }
@@ -90,7 +92,6 @@ export default defineComponent({
       formLoading.value = true
       try {
         if (editingProvider.value) {
-          // 更新
           const payload: ProviderUpdateData = {}
           if (formName.value !== editingProvider.value.name) payload.name = formName.value
           if (formApiKey.value) payload.api_key = formApiKey.value
@@ -98,9 +99,8 @@ export default defineComponent({
           payload.is_enabled = formEnabled.value
           await updateProvider(editingProvider.value.id, payload)
         } else {
-          // 创建
           if (!formName.value || !formApiKey.value) {
-            formError.value = '名称和 API Key 为必填项'
+            formError.value = t('provider.nameAndKeyRequired')
             formLoading.value = false
             return
           }
@@ -115,7 +115,7 @@ export default defineComponent({
         showFormModal.value = false
         await loadProviders()
       } catch (e: any) {
-        formError.value = e.response?.data?.detail || '操作失败'
+        formError.value = e.response?.data?.detail || t('common.operationFailed')
       } finally {
         formLoading.value = false
       }
@@ -140,197 +140,202 @@ export default defineComponent({
       }
     }
 
-    const columns: Column<Provider>[] = [
-      { key: 'name', title: 'Name' },
-      {
-        key: 'base_url',
-        title: 'Base URL',
-        render: (row) => row.base_url || '—',
-      },
-      {
-        key: 'is_enabled',
-        title: 'Status',
-        render: (row) => (
-          <span
-            class={[styles.status, row.is_enabled ? styles.statusEnabled : styles.statusDisabled]}
-          >
-            <span class={styles.statusDot}></span>
-            {row.is_enabled ? 'Enabled' : 'Disabled'}
-          </span>
-        ),
-      },
-      {
-        key: 'actions',
-        title: 'Actions',
-        render: (row) => (
-          <div class={styles.btnGroup}>
-            <button class={styles.btnSecondary} onClick={() => openEdit(row)}>
-              Edit
-            </button>
-            <button
-              class={styles.btnSecondary}
-              onClick={() =>
-                router.push({ name: 'AdminProviderModelManagement', params: { id: row.id } })
-              }
+    return () => {
+      const columns: Column<Provider>[] = [
+        { key: 'name', title: t('provider.name') },
+        {
+          key: 'base_url',
+          title: t('provider.baseUrl'),
+          render: (row) => row.base_url || '—',
+        },
+        {
+          key: 'is_enabled',
+          title: t('provider.status'),
+          render: (row) => (
+            <span
+              class={[styles.status, row.is_enabled ? styles.statusEnabled : styles.statusDisabled]}
             >
-              Models
-            </button>
-            <button class={styles.btnDanger} onClick={() => openDelete(row)}>
-              Delete
+              <span class={styles.statusDot}></span>
+              {row.is_enabled ? t('common.enabled') : t('common.disabled')}
+            </span>
+          ),
+        },
+        {
+          key: 'actions',
+          title: t('provider.actions'),
+          render: (row) => (
+            <div class={styles.btnGroup}>
+              <button class={styles.btnSecondary} onClick={() => openEdit(row)}>
+                {t('common.edit')}
+              </button>
+              <button
+                class={styles.btnSecondary}
+                onClick={() =>
+                  router.push({ name: 'AdminProviderModelManagement', params: { id: row.id } })
+                }
+              >
+                {t('model.title')}
+              </button>
+              <button class={styles.btnDanger} onClick={() => openDelete(row)}>
+                {t('common.delete')}
+              </button>
+            </div>
+          ),
+        },
+      ]
+
+      return (
+        <div class={styles.page}>
+          <div class={styles.header}>
+            <h1 class={styles.title}>{t('provider.title')}</h1>
+            <button class={styles.btnPrimary} onClick={openCreate}>
+              {t('provider.newProvider')}
             </button>
           </div>
-        ),
-      },
-    ]
 
-    return () => (
-      <div class={styles.page}>
-        <div class={styles.header}>
-          <h1 class={styles.title}>Providers</h1>
-          <button class={styles.btnPrimary} onClick={openCreate}>
-            New provider
-          </button>
-        </div>
+          {error.value && <div class={styles.error}>{error.value}</div>}
 
-        {error.value && <div class={styles.error}>{error.value}</div>}
+          <DataTable
+            columns={columns}
+            items={providers.value}
+            total={total.value}
+            page={page.value}
+            pageSize={pageSize.value}
+            loading={loading.value}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
 
-        <DataTable
-          columns={columns}
-          items={providers.value}
-          total={total.value}
-          page={page.value}
-          pageSize={pageSize.value}
-          loading={loading.value}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
+          {/* 创建/编辑 Modal */}
+          {showFormModal.value && (
+            <div
+              class={styles.overlay}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) showFormModal.value = false
+              }}
+            >
+              <div class={styles.modal}>
+                <div class={styles.modalHeader}>
+                  <h2 class={styles.modalTitle}>
+                    {editingProvider.value ? t('provider.editProvider') : t('provider.newProvider')}
+                  </h2>
+                  <button class={styles.modalClose} onClick={() => (showFormModal.value = false)}>
+                    &times;
+                  </button>
+                </div>
+                <form onSubmit={handleFormSubmit}>
+                  <div class={styles.modalBody}>
+                    {formError.value && <div class={styles.error}>{formError.value}</div>}
 
-        {/* 创建/编辑 Modal */}
-        {showFormModal.value && (
-          <div
-            class={styles.overlay}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) showFormModal.value = false
-            }}
-          >
-            <div class={styles.modal}>
-              <div class={styles.modalHeader}>
-                <h2 class={styles.modalTitle}>
-                  {editingProvider.value ? 'Edit provider' : 'New provider'}
-                </h2>
-                <button class={styles.modalClose} onClick={() => (showFormModal.value = false)}>
-                  &times;
-                </button>
-              </div>
-              <form onSubmit={handleFormSubmit}>
-                <div class={styles.modalBody}>
-                  {formError.value && <div class={styles.error}>{formError.value}</div>}
-
-                  <div class={styles.formGroup}>
-                    <label class={styles.formLabel}>Name</label>
-                    <input
-                      class={styles.formInput}
-                      type="text"
-                      value={formName.value}
-                      onInput={(e) => (formName.value = (e.target as HTMLInputElement).value)}
-                    />
-                  </div>
-
-                  <div class={styles.formGroup}>
-                    <label class={styles.formLabel}>
-                      API Key{' '}
-                      {editingProvider.value && (
-                        <span style={{ fontWeight: 'normal', color: '#656d76' }}>
-                          (leave blank to keep current)
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      class={styles.formInput}
-                      type="password"
-                      value={formApiKey.value}
-                      onInput={(e) => (formApiKey.value = (e.target as HTMLInputElement).value)}
-                    />
-                  </div>
-
-                  <div class={styles.formGroup}>
-                    <label class={styles.formLabel}>Base URL</label>
-                    <input
-                      class={styles.formInput}
-                      type="text"
-                      placeholder="https://api.openai.com/v1"
-                      value={formBaseUrl.value}
-                      onInput={(e) => (formBaseUrl.value = (e.target as HTMLInputElement).value)}
-                    />
-                  </div>
-
-                  <div class={styles.formGroup}>
-                    <label class={styles.formCheckbox}>
+                    <div class={styles.formGroup}>
+                      <label class={styles.formLabel}>{t('provider.name')}</label>
                       <input
-                        type="checkbox"
-                        checked={formEnabled.value}
-                        onChange={(e) =>
-                          (formEnabled.value = (e.target as HTMLInputElement).checked)
-                        }
+                        class={styles.formInput}
+                        type="text"
+                        value={formName.value}
+                        onInput={(e) => (formName.value = (e.target as HTMLInputElement).value)}
                       />
-                      Enabled
-                    </label>
+                    </div>
+
+                    <div class={styles.formGroup}>
+                      <label class={styles.formLabel}>
+                        {t('provider.apiKey')}{' '}
+                        {editingProvider.value && (
+                          <span style={{ fontWeight: 'normal', color: '#656d76' }}>
+                            {t('provider.apiKeyHint')}
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        class={styles.formInput}
+                        type="password"
+                        value={formApiKey.value}
+                        onInput={(e) => (formApiKey.value = (e.target as HTMLInputElement).value)}
+                      />
+                    </div>
+
+                    <div class={styles.formGroup}>
+                      <label class={styles.formLabel}>{t('provider.baseUrl')}</label>
+                      <input
+                        class={styles.formInput}
+                        type="text"
+                        placeholder="https://api.openai.com/v1"
+                        value={formBaseUrl.value}
+                        onInput={(e) => (formBaseUrl.value = (e.target as HTMLInputElement).value)}
+                      />
+                    </div>
+
+                    <div class={styles.formGroup}>
+                      <label class={styles.formCheckbox}>
+                        <input
+                          type="checkbox"
+                          checked={formEnabled.value}
+                          onChange={(e) =>
+                            (formEnabled.value = (e.target as HTMLInputElement).checked)
+                          }
+                        />
+                        {t('common.enabled')}
+                      </label>
+                    </div>
                   </div>
+                  <div class={styles.modalFooter}>
+                    <button
+                      type="button"
+                      class={styles.btnSecondary}
+                      onClick={() => (showFormModal.value = false)}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button type="submit" class={styles.btnPrimary} disabled={formLoading.value}>
+                      {formLoading.value ? t('common.saving') : t('common.save')}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 删除确认 Modal */}
+          {showDeleteModal.value && deletingProvider.value && (
+            <div
+              class={styles.overlay}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) showDeleteModal.value = false
+              }}
+            >
+              <div class={styles.modal}>
+                <div class={styles.modalHeader}>
+                  <h2 class={styles.modalTitle}>{t('provider.deleteProvider')}</h2>
+                  <button class={styles.modalClose} onClick={() => (showDeleteModal.value = false)}>
+                    &times;
+                  </button>
+                </div>
+                <div class={styles.modalBody}>
+                  <p class={styles.confirmText}>
+                    {t('provider.deleteConfirm')} <strong>{deletingProvider.value.name}</strong>
+                    {t('provider.deleteProviderWarning')}
+                  </p>
                 </div>
                 <div class={styles.modalFooter}>
                   <button
-                    type="button"
                     class={styles.btnSecondary}
-                    onClick={() => (showFormModal.value = false)}
+                    onClick={() => (showDeleteModal.value = false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
-                  <button type="submit" class={styles.btnPrimary} disabled={formLoading.value}>
-                    {formLoading.value ? 'Saving...' : 'Save'}
+                  <button
+                    class={styles.btnDanger}
+                    onClick={handleDelete}
+                    disabled={deleteLoading.value}
+                  >
+                    {deleteLoading.value ? t('common.deleting') : t('common.delete')}
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* 删除确认 Modal */}
-        {showDeleteModal.value && deletingProvider.value && (
-          <div
-            class={styles.overlay}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) showDeleteModal.value = false
-            }}
-          >
-            <div class={styles.modal}>
-              <div class={styles.modalHeader}>
-                <h2 class={styles.modalTitle}>Delete provider</h2>
-                <button class={styles.modalClose} onClick={() => (showDeleteModal.value = false)}>
-                  &times;
-                </button>
-              </div>
-              <div class={styles.modalBody}>
-                <p class={styles.confirmText}>
-                  Are you sure you want to delete <strong>{deletingProvider.value.name}</strong>?
-                  This will also delete all associated models. This action cannot be undone.
-                </p>
-              </div>
-              <div class={styles.modalFooter}>
-                <button class={styles.btnSecondary} onClick={() => (showDeleteModal.value = false)}>
-                  Cancel
-                </button>
-                <button
-                  class={styles.btnDanger}
-                  onClick={handleDelete}
-                  disabled={deleteLoading.value}
-                >
-                  {deleteLoading.value ? 'Deleting...' : 'Delete'}
-                </button>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    )
+          )}
+        </div>
+      )
+    }
   },
 })

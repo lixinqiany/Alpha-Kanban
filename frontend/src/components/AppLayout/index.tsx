@@ -1,11 +1,13 @@
 import { defineComponent, ref } from 'vue'
 import { RouterView, RouterLink, useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getCurrentUser, isAdmin } from '../../utils/token'
+import { toggleLocale, getLocale } from '../../utils/locale'
 import Dropdown from '../Dropdown'
 import styles from './AppLayout.module.css'
 
 interface TabItem {
-  label: string
+  labelKey: string
   to: string
 }
 
@@ -13,6 +15,7 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const route = useRoute()
+    const { t } = useI18n()
     const showSidebar = ref(false)
 
     const user = getCurrentUser()
@@ -57,7 +60,7 @@ export default defineComponent({
             <div class={styles.sidebarDivider} />
             <nav class={styles.sidebarNav}>
               <RouterLink to={{ name: 'Home' }} class={styles.sidebarLink} onClick={closeSidebar}>
-                Home
+                {t('nav.home')}
               </RouterLink>
               {isAdmin() && (
                 <RouterLink
@@ -65,7 +68,7 @@ export default defineComponent({
                   class={styles.sidebarLink}
                   onClick={closeSidebar}
                 >
-                  Admin
+                  {t('nav.admin')}
                 </RouterLink>
               )}
             </nav>
@@ -77,7 +80,7 @@ export default defineComponent({
                   handleSignOut()
                 }}
               >
-                Sign out
+                {t('nav.signOut')}
               </button>
             </div>
           </aside>
@@ -106,6 +109,13 @@ export default defineComponent({
             </div>
 
             <div class={styles.navRight}>
+              <button
+                class={[styles.langBtn, getLocale() === 'zh-CN' ? styles.langZh : styles.langEn]}
+                onClick={toggleLocale}
+                title={getLocale() === 'zh-CN' ? 'Switch to English' : '切换到中文'}
+              >
+                <span class={styles.langLabel}>{getLocale() === 'zh-CN' ? '中' : 'EN'}</span>
+              </button>
               <Dropdown placement="bottom-right">
                 {{
                   trigger: () => <button class={styles.avatarBtn}>{initial}</button>,
@@ -116,13 +126,13 @@ export default defineComponent({
                       {isAdmin() && (
                         <>
                           <button class={styles.dropdownItem} onClick={handleAdmin}>
-                            Admin
+                            {t('nav.admin')}
                           </button>
                           <div class={styles.dropdownDivider}></div>
                         </>
                       )}
                       <button class={styles.dropdownItem} onClick={handleSignOut}>
-                        Sign out
+                        {t('nav.signOut')}
                       </button>
                     </>
                   ),
@@ -140,7 +150,7 @@ export default defineComponent({
                     to={tab.to}
                     class={[styles.tabItem, route.path === tab.to && styles.tabItemActive]}
                   >
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </RouterLink>
                 ))}
               </div>

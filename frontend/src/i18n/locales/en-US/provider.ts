@@ -1,0 +1,17 @@
+export default {
+  title: 'Providers',
+  newProvider: 'New provider',
+  editProvider: 'Edit provider',
+  deleteProvider: 'Delete provider',
+  name: 'Name',
+  baseUrl: 'Base URL',
+  apiKey: 'API Key',
+  apiKeyHint: '(leave blank to keep current)',
+  status: 'Status',
+  actions: 'Actions',
+  loadFailed: 'Failed to load providers',
+  nameAndKeyRequired: 'Name and API Key are required',
+  deleteConfirm: 'Are you sure you want to delete',
+  deleteProviderWarning:
+    '? This will also delete all associated models. This action cannot be undone.',
+}
