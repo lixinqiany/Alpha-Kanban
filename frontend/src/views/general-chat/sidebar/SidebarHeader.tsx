@@ -16,10 +16,10 @@ export default defineComponent({
     return () => (
       <div class={styles.header}>
         <button
-          class={[styles.newChatBtn, props.isNewChatActive && styles.active]}
+          class={[styles.sidebarItem, props.isNewChatActive && styles.active]}
           onClick={() => emit('newChat')}
         >
-          <SvgIcon icon={NewChatIcon} size={18} />
+          <SvgIcon icon={NewChatIcon} size={20} />
           <span>{t('chat.newChat')}</span>
         </button>
       </div>

@@ -3,32 +3,50 @@
   padding: 12px;
 }
 
-.newChatBtn {
+/* ── 通用侧边栏按钮项（含选中指示条） ── */
+.sidebarItem {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 12px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0px 6px;
   font-size: 14px;
   font-weight: 500;
   color: #24292f;
   background: none;
   border: none;
   border-radius: 8px;
-  border-left: 3px solid transparent;
   cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
+  transition: background-color 0.15s;
 }
 
-.newChatBtn:hover {
+.sidebarItem::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  height: 100%;
+  width: 3px;
+  border-radius: 2px;
+  background-color: transparent;
+  transition: background-color 0.15s;
+}
+
+.sidebarItem:hover {
   background-color: #f6f8fa;
-  border-left-color: #0969da;
+}
+
+.sidebarItem:hover::before {
+  background-color: #0969da;
 }
 
 .active {
   background-color: #f6f8fa;
-  border-left-color: #0969da;
   font-weight: 600;
+}
+
+.active::before {
+  background-color: #0969da;
 }
