@@ -1,6 +1,6 @@
 """模型通用模块响应类型"""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
 class AvailableModel(BaseModel):
@@ -8,11 +8,6 @@ class AvailableModel(BaseModel):
     display_name: str
 
 
-class ModelGroup(BaseModel):
-    manufacturer: str
-    manufacturer_label: str
-    models: list[AvailableModel]
-
-
-class AvailableModelsResponse(BaseModel):
-    groups: list[ModelGroup]
+# 按厂商分组：{ "OpenAI": [model, ...], "Anthropic": [...] }
+class AvailableModelsByManufacturer(RootModel[dict[str, list[AvailableModel]]]):
+    pass

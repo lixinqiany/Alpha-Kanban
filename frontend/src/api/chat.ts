@@ -22,11 +22,13 @@ export interface Message {
   created_at: string
 }
 
-export interface ModelGroup {
-  manufacturer: string
-  manufacturer_label: string
-  models: { name: string; display_name: string }[]
+export interface AvailableModel {
+  name: string
+  display_name: string
 }
+
+// 按厂商分组：{ "OpenAI": [model, ...], "Anthropic": [...] }
+export type AvailableModelsByManufacturer = Record<string, AvailableModel[]>
 
 export type ChatSSEEvent =
   | { type: 'conversation_created'; conversation_id: string }
@@ -63,7 +65,7 @@ export function deleteConversation(conversationId: string) {
 // ── Model API ──
 
 export function getAvailableModels() {
-  return authClient.get<{ groups: ModelGroup[] }>('/model/available')
+  return authClient.get<AvailableModelsByManufacturer>('/model/available/byManufacturer')
 }
 
 // ── SSE 流参数构建（交给 useSSE 发起） ──

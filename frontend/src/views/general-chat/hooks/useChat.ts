@@ -9,7 +9,7 @@ import {
   buildContinueChatRequest,
   type Conversation,
   type Message,
-  type ModelGroup,
+  type AvailableModelsByManufacturer,
   type ChatSSEEvent,
 } from '@/api/chat'
 
@@ -25,7 +25,7 @@ export function useChat(options?: UseChatOptions) {
   const messages = ref<Message[]>([])
   const streamingContent = ref('')
   const streamingThinking = ref('')
-  const availableModels = ref<ModelGroup[]>([])
+  const availableModels = ref<AvailableModelsByManufacturer>({})
   const currentModel = ref<string | null>(null)
 
   const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEvent>()
@@ -57,11 +57,11 @@ export function useChat(options?: UseChatOptions) {
   async function loadAvailableModels() {
     try {
       const { data } = await getAvailableModels()
-      availableModels.value = data.groups
-      // 默认选第一个模型
-      const firstGroup = data.groups[0]
-      if (!currentModel.value && firstGroup && firstGroup.models.length > 0) {
-        currentModel.value = firstGroup.models[0]!.name
+      availableModels.value = data
+      // 默认选第一个厂商的第一个模型
+      const firstKey = Object.keys(data)[0]
+      if (!currentModel.value && firstKey && data[firstKey].length > 0) {
+        currentModel.value = data[firstKey][0]!.name
       }
     } catch (err) {
       console.error('加载可用模型失败', err)

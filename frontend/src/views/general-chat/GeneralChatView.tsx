@@ -1,18 +1,18 @@
 import { defineComponent, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import GeneralChatLayout from '@/components/GeneralChatLayout'
 import SidebarHeader from './sidebar/SidebarHeader'
 import type { SidebarFeature } from './sidebar/SidebarHeader'
 import ConversationList from './sidebar/ConversationList'
 import MessageArea from './main/MessageArea'
 import ChatInput from './main/ChatInput'
+import SvgIcon from '@/components/SvgIcon'
+import RobotIcon from '@/assets/icons/robot.svg?component'
 import { useChat } from './hooks/useChat'
 import styles from './general-chat-view.module.css'
 
 export default defineComponent({
   name: 'GeneralChatView',
   setup() {
-    const { t } = useI18n()
     const activeFeature = ref<SidebarFeature | null>('newChat')
 
     const {
@@ -66,8 +66,7 @@ export default defineComponent({
           default: () =>
             currentMessages.value.length === 0 && !isStreaming.value ? (
               <div class={styles.contentEmpty}>
-                <h2 class={styles.emptyTitle}>{t('chat.emptyTitle')}</h2>
-                <p class={styles.emptySubtitle}>{t('chat.emptySubtitle')}</p>
+                <SvgIcon icon={RobotIcon} size={48} color="#656d76" />
                 <ChatInput
                   models={availableModels.value}
                   currentModel={currentModel.value}
@@ -88,6 +87,7 @@ export default defineComponent({
                     models={availableModels.value}
                     currentModel={currentModel.value}
                     disabled={isStreaming.value}
+                    dropdownPlacement="top-left"
                     onSend={sendMessage}
                     {...{ 'onUpdate:model': changeModel }}
                   />

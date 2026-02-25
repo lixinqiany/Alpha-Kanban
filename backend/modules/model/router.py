@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.postgres import get_postgres_session
 from modules.user.dependencies import get_current_user
-from modules.model.schema import AvailableModelsResponse
-from modules.model.service import get_available_models
+from modules.model.schema import AvailableModelsByManufacturer
+from modules.model.service import get_available_models_by_manufacturer
 
 router = APIRouter(
     prefix="/api/model",
@@ -15,8 +15,8 @@ router = APIRouter(
 )
 
 
-@router.get("/available", response_model=AvailableModelsResponse)
-async def api_get_available_models(
+@router.get("/available/byManufacturer", response_model=AvailableModelsByManufacturer)
+async def api_get_available_models_by_manufacturer(
     session: AsyncSession = Depends(get_postgres_session),
 ):
-    return await get_available_models(session)
+    return await get_available_models_by_manufacturer(session)
