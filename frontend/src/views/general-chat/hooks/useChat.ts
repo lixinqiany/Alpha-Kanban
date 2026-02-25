@@ -13,11 +13,15 @@ import {
   type ChatSSEEvent,
 } from '@/api/chat'
 
-export function useChat() {
+export interface UseChatOptions {
+  onConversationCreated?: (id: string) => void
+  onConversationDeleted?: () => void
+}
+
+export function useChat(options?: UseChatOptions) {
   // ── 状态 ──
   const conversations = ref<Conversation[]>([])
   const activeConversationId = ref<string | null>(null)
-  const isNewChatActive = ref(true)
   const messages = ref<Message[]>([])
   const streamingContent = ref('')
   const streamingThinking = ref('')
@@ -26,8 +30,8 @@ export function useChat() {
 
   const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEvent>()
 
-  // 流式过程中新创建的会话 ID（title 事件到达前暂存）
-  let pendingConversationId: string | null = null
+  // 流式过程中暂存用户首条消息内容（用于临时标题）
+  let pendingUserContent: string = ''
 
   // ── 计算属性 ──
   const currentMessages = computed(() => messages.value)
@@ -40,7 +44,11 @@ export function useChat() {
   async function loadConversations() {
     try {
       const { data } = await listConversations(1, 50)
-      conversations.value = data.items
+      // 兜底：数据库中可能存在 title 为 null 的旧数据
+      conversations.value = data.items.map((c) => ({
+        ...c,
+        title: c.title || c.id,
+      }))
     } catch (err) {
       console.error('加载会话列表失败', err)
     }
@@ -73,13 +81,11 @@ export function useChat() {
   async function selectConversation(id: string) {
     if (id === activeConversationId.value) return
     activeConversationId.value = id
-    isNewChatActive.value = false
     await loadMessages(id)
   }
 
   function startNewChat() {
     activeConversationId.value = null
-    isNewChatActive.value = true
     messages.value = []
     streamingContent.value = ''
     streamingThinking.value = ''
@@ -102,25 +108,38 @@ export function useChat() {
     messages.value = [...messages.value, tempUserMsg]
     streamingContent.value = ''
     streamingThinking.value = ''
-    pendingConversationId = null
+    pendingUserContent = content
 
     // 构建请求
-    const isNew = isNewChatActive.value
+    const isNew = activeConversationId.value === null
     const { url, body } = isNew
       ? buildNewChatRequest(currentModel.value, content)
       : buildContinueChatRequest(activeConversationId.value!, currentModel.value, content)
 
     await startSSE(url, body, {
-      onMessage: (event) => handleSSEEvent(event, isNew),
+      onMessage: (event) => handleSSEEvent(event),
       onError: (err) => console.error('SSE 错误', err),
     })
   }
 
-  function handleSSEEvent(event: ChatSSEEvent, isNew: boolean) {
+  function handleSSEEvent(event: ChatSSEEvent) {
     switch (event.type) {
-      case 'conversation_created':
-        pendingConversationId = event.conversation_id
+      case 'conversation_created': {
+        // 立即用用户消息内容截取前 200 字符作为临时标题
+        const tempTitle = pendingUserContent.slice(0, 200)
+        const newConv: Conversation = {
+          id: event.conversation_id,
+          title: tempTitle,
+          last_model: currentModel.value!,
+          last_chat_time: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        conversations.value = [newConv, ...conversations.value]
+        activeConversationId.value = event.conversation_id
+        options?.onConversationCreated?.(event.conversation_id)
         break
+      }
 
       case 'thinking':
         streamingThinking.value += event.content
@@ -149,21 +168,8 @@ export function useChat() {
       }
 
       case 'title': {
-        if (isNew && pendingConversationId) {
-          // 构建新会话对象并插入列表顶部
-          const newConv: Conversation = {
-            id: pendingConversationId,
-            title: event.title,
-            last_model: currentModel.value!,
-            last_chat_time: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-          conversations.value = [newConv, ...conversations.value]
-          activeConversationId.value = pendingConversationId
-          isNewChatActive.value = false
-        } else if (activeConversationId.value) {
-          // 更新已有会话标题
+        // 用 AI 生成的标题替换临时标题
+        if (activeConversationId.value) {
           conversations.value = conversations.value.map((c) =>
             c.id === activeConversationId.value ? { ...c, title: event.title } : c,
           )
@@ -185,6 +191,7 @@ export function useChat() {
       conversations.value = conversations.value.filter((c) => c.id !== id)
       if (activeConversationId.value === id) {
         startNewChat()
+        options?.onConversationDeleted?.()
       }
     } catch (err) {
       console.error('删除会话失败', err)
@@ -199,7 +206,6 @@ export function useChat() {
     // 状态
     conversations,
     activeConversationId,
-    isNewChatActive,
     currentMessages,
     isStreaming,
     availableModels,

@@ -23,9 +23,9 @@ export default defineComponent({
               key={conv.id}
               class={[styles.item, conv.id === props.activeConversationId && styles.active]}
               onClick={() => emit('select', conv.id)}
-              title={conv.title || t('chat.untitled')}
+              title={conv.title}
             >
-              {conv.title || t('chat.untitled')}
+              {conv.title}
             </button>
           ))
         )}

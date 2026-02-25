@@ -19,6 +19,11 @@ export default defineComponent({
                 <div class={styles.sidebarHeader}>{slots['sidebar-header']()}</div>
               )}
               {/* body：容器始终渲染以保持 flex 布局结构，?.() 防止未传插槽时调用 undefined 报错 */}
+              <div class={styles.sidebarBody}>{slots['sidebar-body']?.()}</div>
+              {/* footer：未传入插槽时整个容器 div 不渲染，避免空 div 占位 */}
+              {slots['sidebar-footer'] && (
+                <div class={styles.sidebarFooter}>{slots['sidebar-footer']()}</div>
+              )}
             </>
           )}
         </aside>

@@ -4,7 +4,7 @@ import { authClient } from './client'
 
 export interface Conversation {
   id: string
-  title: string | null
+  title: string
   last_model: string
   last_chat_time: string
   created_at: string

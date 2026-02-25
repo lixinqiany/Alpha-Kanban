@@ -1,7 +1,8 @@
-import { defineComponent, onMounted } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GeneralChatLayout from '@/components/GeneralChatLayout'
 import SidebarHeader from './sidebar/SidebarHeader'
+import type { SidebarFeature } from './sidebar/SidebarHeader'
 import ConversationList from './sidebar/ConversationList'
 import MessageArea from './main/MessageArea'
 import ChatInput from './main/ChatInput'
@@ -12,10 +13,11 @@ export default defineComponent({
   name: 'GeneralChatView',
   setup() {
     const { t } = useI18n()
+    const activeFeature = ref<SidebarFeature | null>('newChat')
+
     const {
       conversations,
       activeConversationId,
-      isNewChatActive,
       currentMessages,
       isStreaming,
       availableModels,
@@ -23,11 +25,28 @@ export default defineComponent({
       streamingContent,
       streamingThinking,
       init,
-      selectConversation,
-      startNewChat,
+      selectConversation: selectConversationRaw,
+      startNewChat: startNewChatRaw,
       sendMessage,
       changeModel,
-    } = useChat()
+    } = useChat({
+      onConversationCreated: () => {
+        activeFeature.value = null
+      },
+      onConversationDeleted: () => {
+        activeFeature.value = 'newChat'
+      },
+    })
+
+    function handleNewChat() {
+      startNewChatRaw()
+      activeFeature.value = 'newChat'
+    }
+
+    function handleSelectConversation(id: string) {
+      selectConversationRaw(id)
+      activeFeature.value = null
+    }
 
     onMounted(init)
 
@@ -35,13 +54,13 @@ export default defineComponent({
       <GeneralChatLayout sidebarWidth={260}>
         {{
           'sidebar-header': () => (
-            <SidebarHeader isNewChatActive={isNewChatActive.value} onNewChat={startNewChat} />
+            <SidebarHeader activeFeature={activeFeature.value} onNewChat={handleNewChat} />
           ),
           'sidebar-body': () => (
             <ConversationList
               conversations={conversations.value}
               activeConversationId={activeConversationId.value}
-              onSelect={selectConversation}
+              onSelect={handleSelectConversation}
             />
           ),
           default: () =>
