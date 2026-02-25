@@ -36,7 +36,7 @@ class Conversation(Base):
         String(100), nullable=False,
     )
     last_chat_time: Mapped[datetime] = mapped_column(
-        DateTime(), server_default=func.now(),
+        DateTime(timezone=True), server_default=func.now(),
     )
 
 
