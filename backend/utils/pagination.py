@@ -24,6 +24,7 @@ async def paginate(
     query: Select,
     page: int = 1,
     page_size: int = 10,
+    unique: bool = False,
 ) -> PaginatedResponse:
     """异步分页查询帮助函数
 
@@ -35,6 +36,7 @@ async def paginate(
         query: 已构建好的 SQLAlchemy Select 语句
         page: 页码（从1开始）
         page_size: 每页条数
+        unique: 是否对结果去重（joinedload 场景需要）
     """
     # 将原始查询包装为子查询，用 COUNT(*) 统计总数（标准 SQL 聚合）
     count_query = select(func.count()).select_from(query.subquery())
@@ -43,7 +45,10 @@ async def paginate(
     # 分页查询
     paginated_query = query.offset((page - 1) * page_size).limit(page_size)
     result = await session.execute(paginated_query)
-    items = list(result.scalars().all())
+    if unique:
+        items = list(result.unique().scalars().all())
+    else:
+        items = list(result.scalars().all())
 
     total_pages = math.ceil(total / page_size) if page_size > 0 else 0
 

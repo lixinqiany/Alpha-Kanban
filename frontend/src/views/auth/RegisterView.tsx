@@ -1,5 +1,6 @@
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { register } from '../../api/user'
 import AuthLayout from '../../components/AuthLayout'
 import styles from './auth.module.css'
@@ -7,6 +8,7 @@ import styles from './auth.module.css'
 export default defineComponent({
   setup() {
     const router = useRouter()
+    const { t } = useI18n()
     const username = ref('')
     const password = ref('')
     const error = ref('')
@@ -14,13 +16,13 @@ export default defineComponent({
 
     function validate(): string | null {
       if (!username.value || !password.value) {
-        return 'Please fill in all fields.'
+        return t('auth.fillAllFields')
       }
       if (username.value.length < 2 || username.value.length > 50) {
-        return 'Username must be between 2 and 50 characters.'
+        return t('auth.usernameLengthError')
       }
       if (password.value.length < 6) {
-        return 'Password must be at least 6 characters.'
+        return t('auth.passwordLengthError')
       }
       return null
     }
@@ -42,9 +44,9 @@ export default defineComponent({
       } catch (e: any) {
         const status = e.response?.status
         if (status === 409) {
-          error.value = 'Username already exists.'
+          error.value = t('auth.usernameExists')
         } else {
-          error.value = e.response?.data?.detail || 'Registration failed. Please try again.'
+          error.value = e.response?.data?.detail || t('auth.registerFailed')
         }
       } finally {
         loading.value = false
@@ -53,15 +55,17 @@ export default defineComponent({
 
     return () => (
       <AuthLayout
-        title="Create your account"
-        footerText="Already have an account?"
-        footerLinkText="Sign in"
+        title={t('auth.signUpTitle')}
+        footerText={t('auth.alreadyHaveAccount')}
+        footerLinkText={t('auth.signIn')}
         footerLinkTo={{ name: 'Login' }}
       >
         <form class={styles.card} onSubmit={handleSubmit}>
           {error.value && <div class={styles.error}>{error.value}</div>}
 
-          <label class={styles.label} for="username">Username</label>
+          <label class={styles.label} for="username">
+            {t('auth.username')}
+          </label>
           <input
             id="username"
             class={styles.input}
@@ -71,7 +75,9 @@ export default defineComponent({
             onInput={(e) => (username.value = (e.target as HTMLInputElement).value)}
           />
 
-          <label class={styles.label} for="password">Password</label>
+          <label class={styles.label} for="password">
+            {t('auth.password')}
+          </label>
           <input
             id="password"
             class={styles.input}
@@ -82,7 +88,7 @@ export default defineComponent({
           />
 
           <button class={styles.button} type="submit" disabled={loading.value}>
-            {loading.value ? 'Creating account...' : 'Create account'}
+            {loading.value ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
         </form>
       </AuthLayout>

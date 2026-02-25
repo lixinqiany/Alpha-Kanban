@@ -36,7 +36,7 @@ class Conversation(Base):
         String(100), nullable=False,
     )
     last_chat_time: Mapped[datetime] = mapped_column(
-        DateTime(), server_default=func.now(),
+        DateTime(timezone=True), server_default=func.now(),
     )
 
 
@@ -67,4 +67,7 @@ class Message(Base):
     )
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default="completed",
+    )
+    thinking: Mapped[str | None] = mapped_column(
+        Text(), nullable=True,
     )

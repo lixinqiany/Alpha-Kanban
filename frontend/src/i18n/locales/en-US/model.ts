@@ -1,0 +1,16 @@
+export default {
+  title: 'Models',
+  newModel: 'New model',
+  editModel: 'Edit model',
+  deleteModel: 'Delete model',
+  modelName: 'Model Name',
+  displayName: 'Display Name',
+  manufacturer: 'Manufacturer',
+  providers: 'Providers',
+  noProviders: 'No providers',
+  selectProviders: 'Select providers',
+  loadFailed: 'Failed to load models',
+  nameAndDisplayRequired: 'Model name and display name are required',
+  deleteConfirm: 'Are you sure you want to delete model',
+  deleteWarning: '? This action cannot be undone.',
+}

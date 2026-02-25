@@ -1,4 +1,5 @@
 import { defineComponent, type PropType, type VNode } from 'vue'
+import { useI18n } from 'vue-i18n'
 import styles from './DataTable.module.css'
 
 export interface Column<T = any> {
@@ -41,14 +42,15 @@ export default defineComponent({
   },
   emits: ['pageChange', 'pageSizeChange'],
   setup(props, { emit }) {
+    const { t } = useI18n()
     const totalPages = () => Math.ceil(props.total / props.pageSize) || 1
 
     return () => (
       <div class={styles.tableWrap}>
         {props.loading ? (
-          <div class={styles.loading}>Loading...</div>
+          <div class={styles.loading}>{t('common.loading')}</div>
         ) : props.items.length === 0 ? (
-          <div class={styles.empty}>No data</div>
+          <div class={styles.empty}>{t('common.noData')}</div>
         ) : (
           <table class={styles.table}>
             <thead>
@@ -62,9 +64,7 @@ export default defineComponent({
               {props.items.map((row, idx) => (
                 <tr key={row.id ?? idx}>
                   {props.columns.map((col) => (
-                    <td key={col.key}>
-                      {col.render ? col.render(row) : row[col.key]}
-                    </td>
+                    <td key={col.key}>{col.render ? col.render(row) : row[col.key]}</td>
                   ))}
                 </tr>
               ))}
@@ -78,15 +78,19 @@ export default defineComponent({
             <div class={styles.paginationInfo}>
               <span>
                 {(props.page - 1) * props.pageSize + 1}–
-                {Math.min(props.page * props.pageSize, props.total)} of {props.total}
+                {Math.min(props.page * props.pageSize, props.total)} {t('table.of')} {props.total}
               </span>
               <select
                 class={styles.pageSizeSelect}
                 value={props.pageSize}
-                onChange={(e) => emit('pageSizeChange', Number((e.target as HTMLSelectElement).value))}
+                onChange={(e) =>
+                  emit('pageSizeChange', Number((e.target as HTMLSelectElement).value))
+                }
               >
                 {props.pageSizeOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt} / page</option>
+                  <option key={opt} value={opt}>
+                    {opt} {t('table.perPage')}
+                  </option>
                 ))}
               </select>
             </div>
@@ -96,15 +100,17 @@ export default defineComponent({
                 disabled={props.page <= 1}
                 onClick={() => emit('pageChange', props.page - 1)}
               >
-                Previous
+                {t('table.previous')}
               </button>
-              <span>{props.page} / {totalPages()}</span>
+              <span>
+                {props.page} / {totalPages()}
+              </span>
               <button
                 class={styles.pageBtn}
                 disabled={props.page >= totalPages()}
                 onClick={() => emit('pageChange', props.page + 1)}
               >
-                Next
+                {t('table.next')}
               </button>
             </div>
           </div>

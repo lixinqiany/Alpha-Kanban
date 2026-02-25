@@ -10,4 +10,5 @@ tmp/
 
 __pycache__/
 .claude/
-.vscode/
+.vscode/*
+!.vscode/settings.json

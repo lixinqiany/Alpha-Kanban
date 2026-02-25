@@ -171,6 +171,54 @@
   gap: 8px;
 }
 
+/* ── 语言切换按钮 ── */
+.langBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #656d76;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.langBtn:hover {
+  background-color: #f6f8fa;
+  color: #1f2328;
+}
+
+/* ── 语言下拉面板 ── */
+.langDropdown {
+  min-width: 120px;
+  max-width: 150px;
+}
+
+/* ── 语言下拉选项 ── */
+.langOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.langOptionActive {
+  color: #0969da;
+  font-weight: 600;
+}
+
+.langOptionActive:hover {
+  color: #ffffff;
+}
+
+.langCheck {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
 .avatarBtn {
   display: flex;
   align-items: center;

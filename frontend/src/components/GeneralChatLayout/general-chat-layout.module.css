@@ -1,0 +1,52 @@
+/* ── 聊天布局 ── */
+.layout {
+  display: flex;
+  height: 100%;
+  /* 子元素超出容器高度时裁剪隐藏，避免整个布局被撑开或出现外层滚动条 */
+  overflow: hidden;
+}
+
+.sidebar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-right: 1px solid #d1d9e0;
+  overflow: hidden;
+}
+
+.sidebarHeader {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.sidebarHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background-color: #d1d9e0;
+}
+
+.sidebarBody {
+  /* 占满 header 和 footer 之间的剩余空间，即使没有内容也会保持占位 */
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebarFooter {
+  flex-shrink: 0;
+}
+
+.main {
+  flex: 1;
+  /* flex 子元素默认 min-width: auto，会被内容撑大而突破 flex 分配的宽度；
+     设为 0 允许元素缩小到比内容更窄，再由 overflow: hidden 裁剪溢出部分 */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #f6f8fa;
+  overflow: hidden;
+}

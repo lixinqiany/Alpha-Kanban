@@ -5,10 +5,8 @@ import AppLayout from '../components/AppLayout'
 import AdminLayout from '../components/AdminLayout'
 import HomeView from '../views/home/HomeView'
 import OverviewContent from '../views/home/OverviewContent'
-import ActivityContent from '../views/home/ActivityContent'
-import ProviderListView from '../views/provider/ProviderListView'
-import ProviderModelsView from '../views/provider/ProviderModelsView'
-
+import ProviderListView from '../views/admin/provider/ProviderListView'
+import ModelListView from '../views/admin/model/ModelListView'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -23,15 +21,14 @@ const router = createRouter({
           path: 'home',
           component: HomeView,
           meta: {
-            tabs: [
-              { label: 'Overview', to: '/home' },
-              { label: 'Activity', to: '/home/activity' },
-            ],
+            tabs: [{ labelKey: 'nav.overview', to: '/home' }],
           },
-          children: [
-            { path: '', name: 'Home', component: OverviewContent },
-            { path: 'activity', name: 'HomeActivity', component: ActivityContent },
-          ],
+          children: [{ path: '', name: 'Home', component: OverviewContent }],
+        },
+        {
+          path: 'chat',
+          name: 'Chat',
+          component: () => import('../views/general-chat/GeneralChatView'),
         },
         {
           path: 'admin',
@@ -39,7 +36,7 @@ const router = createRouter({
           children: [
             { path: '', redirect: { name: 'AdminProviderManagement' } },
             { path: 'providers', name: 'AdminProviderManagement', component: ProviderListView },
-            { path: 'providers/:id/models', name: 'AdminProviderModelManagement', component: ProviderModelsView },
+            { path: 'models', name: 'AdminModelManagement', component: ModelListView },
           ],
         },
       ],
@@ -48,7 +45,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to:RouteLocationNormalized) => {
+router.beforeEach((to: RouteLocationNormalized) => {
   const token = localStorage.getItem('access_token')
   // to.path 只包含 URL 的路径部分，不含域名、查询参数、哈希。
   const isPublic = to.name === 'Login' || to.name === 'Register'

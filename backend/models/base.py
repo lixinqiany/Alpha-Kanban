@@ -13,11 +13,11 @@ class Base(DeclarativeBase):
         default=uuid.uuid4,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
+        DateTime(timezone=True),
         server_default=func.now(),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(),
+        DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
     )

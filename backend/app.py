@@ -8,6 +8,10 @@ from config.postgres import postgres_manager
 # 注册业务路由
 from modules.user.router import router as user_router
 from modules.provider_management.router import router as provider_management_router
+from modules.model_management.router import router as model_management_router
+from modules.chat.router import router as chat_router
+from modules.general_chat.router import router as general_chat_router
+from modules.model.router import router as model_router
 
 env = Environment()
 # 在 lifespan 初始化前配置日志级别，因为 lifespan 也需要使用 logger
@@ -27,6 +31,10 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(user_router)
 app.include_router(provider_management_router)
+app.include_router(model_management_router)
+app.include_router(chat_router)
+app.include_router(general_chat_router)
+app.include_router(model_router)
 
 if __name__ == "__main__":
     import uvicorn

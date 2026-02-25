@@ -1,0 +1,34 @@
+/* ── 空状态：输入框居中 ── */
+.contentEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  gap: 8px;
+}
+
+/* ── 有消息时：叠层布局 ── */
+.contentWithMessages {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chatInputWrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 0 24px;
+  pointer-events: none;
+  background: linear-gradient(transparent, #f6f8fa 40%);
+  z-index: 1;
+}
+
+.chatInputWrapper > * {
+  pointer-events: auto;
+}

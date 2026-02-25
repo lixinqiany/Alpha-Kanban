@@ -1,4 +1,12 @@
-import { defineComponent, ref, onMounted, onUnmounted, computed, type PropType, type CSSProperties } from 'vue'
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  onUnmounted,
+  computed,
+  type PropType,
+  type CSSProperties,
+} from 'vue'
 import styles from './Dropdown.module.css'
 
 type Placement = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
