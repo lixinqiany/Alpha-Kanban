@@ -9,5 +9,7 @@ export default {
   disabled: 'Disabled',
   loading: 'Loading...',
   noData: 'No data',
+  noMore: 'No more data',
+  retry: 'Retry',
   operationFailed: 'Operation failed',
 }

@@ -25,8 +25,16 @@ export function useChat(options?: UseChatOptions) {
   const messages = ref<Message[]>([])
   const streamingContent = ref('')
   const streamingThinking = ref('')
+  const messageLoadError = ref<string | null>(null)
   const availableModels = ref<AvailableModelsByManufacturer>({})
   const currentModel = ref<string | null>(null)
+
+  // 会话列表分页
+  const conversationPage = ref(0)
+  const hasMoreConversations = ref(true)
+  const conversationsLoading = ref(false)
+  const conversationLoadError = ref<string | null>(null)
+  const PAGE_SIZE = 20
 
   const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEvent>()
 
@@ -38,19 +46,34 @@ export function useChat(options?: UseChatOptions) {
 
   // ── 生命周期 ──
   async function init() {
-    await Promise.all([loadConversations(), loadAvailableModels()])
+    await loadAvailableModels()
   }
 
-  async function loadConversations() {
+  async function loadMoreConversations() {
+    if (conversationsLoading.value || !hasMoreConversations.value) return
+
+    const page = conversationPage.value + 1
+    conversationLoadError.value = null
+    conversationsLoading.value = true
+
     try {
-      const { data } = await listConversations(1, 50)
-      // 兜底：数据库中可能存在 title 为 null 的旧数据
-      conversations.value = data.items.map((c) => ({
+      const { data } = await listConversations(page, PAGE_SIZE)
+      const mapped = data.items.map((c) => ({
         ...c,
         title: c.title || c.id,
       }))
+
+      // 去重：新会话本地插入会导致服务端分页偏移，下一页可能包含已有项
+      const existingIds = new Set(conversations.value.map((c) => c.id))
+      const newItems = mapped.filter((c) => !existingIds.has(c.id))
+      conversations.value = [...conversations.value, ...newItems]
+      conversationPage.value = page
+      hasMoreConversations.value = data.page < data.total_pages
     } catch (err) {
       console.error('加载会话列表失败', err)
+      conversationLoadError.value = '加载失败'
+    } finally {
+      conversationsLoading.value = false
     }
   }
 
@@ -60,8 +83,9 @@ export function useChat(options?: UseChatOptions) {
       availableModels.value = data
       // 默认选第一个厂商的第一个模型
       const firstKey = Object.keys(data)[0]
-      if (!currentModel.value && firstKey && data[firstKey].length > 0) {
-        currentModel.value = data[firstKey][0]!.name
+      const firstGroup = firstKey ? data[firstKey] : undefined
+      if (!currentModel.value && firstGroup && firstGroup.length > 0) {
+        currentModel.value = firstGroup[0]!.name
       }
     } catch (err) {
       console.error('加载可用模型失败', err)
@@ -69,11 +93,14 @@ export function useChat(options?: UseChatOptions) {
   }
 
   async function loadMessages(conversationId: string) {
+    messages.value = []
+    messageLoadError.value = null
     try {
       const { data } = await getConversationMessages(conversationId)
       messages.value = data
     } catch (err) {
       console.error('加载消息失败', err)
+      messageLoadError.value = '消息加载失败，请重试'
     }
   }
 
@@ -207,11 +234,16 @@ export function useChat(options?: UseChatOptions) {
     conversations,
     activeConversationId,
     currentMessages,
+    messageLoadError,
     isStreaming,
     availableModels,
     currentModel,
     streamingContent,
     streamingThinking,
+    // 会话列表分页状态
+    hasMoreConversations,
+    conversationsLoading,
+    conversationLoadError,
     // 操作
     init,
     selectConversation,
@@ -220,5 +252,6 @@ export function useChat(options?: UseChatOptions) {
     deleteConversation,
     changeModel,
     abortSSE,
+    loadMoreConversations,
   }
 }

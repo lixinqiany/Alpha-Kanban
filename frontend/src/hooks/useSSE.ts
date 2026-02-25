@@ -1,4 +1,5 @@
 import { ref, readonly } from 'vue'
+import { fetchEventSource } from '@microsoft/fetch-event-source'
 
 export interface UseSSEOptions<T> {
   onMessage: (event: T) => void
@@ -16,7 +17,8 @@ export function useSSE<T>() {
 
     try {
       const token = localStorage.getItem('access_token')
-      const response = await fetch(url, {
+
+      await fetchEventSource(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,49 +26,34 @@ export function useSSE<T>() {
         },
         body: JSON.stringify(body),
         signal: abortController.signal,
-      })
+        // 不自动重连，流结束即关闭
+        openWhenHidden: true,
 
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(`HTTP ${response.status}: ${text}`)
-      }
+        onopen: async (response) => {
+          if (!response.ok) {
+            const text = await response.text()
+            throw new Error(`HTTP ${response.status}: ${text}`)
+          }
+        },
 
-      const reader = response.body!.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        // 保留最后一个不完整的行
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          const trimmed = line.trim()
-          if (!trimmed || !trimmed.startsWith('data: ')) continue
+        onmessage: (ev) => {
           try {
-            const data = JSON.parse(trimmed.slice(6)) as T
+            const data = JSON.parse(ev.data) as T
             options.onMessage(data)
           } catch {
-            // 忽略解析失败的行
+            // 忽略解析失败的事件
           }
-        }
-      }
+        },
 
-      // 处理 buffer 中剩余数据
-      if (buffer.trim().startsWith('data: ')) {
-        try {
-          const data = JSON.parse(buffer.trim().slice(6)) as T
-          options.onMessage(data)
-        } catch {
-          // 忽略
-        }
-      }
+        onerror: (err) => {
+          // 抛出错误以阻止自动重连
+          throw err
+        },
 
-      options.onComplete?.()
+        onclose: () => {
+          options.onComplete?.()
+        },
+      })
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         options.onError?.(err as Error)

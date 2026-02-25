@@ -9,5 +9,7 @@ export default {
   disabled: '已禁用',
   loading: '加载中...',
   noData: '暂无数据',
+  noMore: '没有更多了',
+  retry: '重试',
   operationFailed: '操作失败',
 }

@@ -24,11 +24,15 @@ export default defineComponent({
       currentModel,
       streamingContent,
       streamingThinking,
+      hasMoreConversations,
+      conversationsLoading,
+      conversationLoadError,
       init,
-      selectConversation: selectConversationRaw,
+      selectConversation,
       startNewChat: startNewChatRaw,
       sendMessage,
       changeModel,
+      loadMoreConversations,
     } = useChat({
       onConversationCreated: () => {
         activeFeature.value = null
@@ -44,7 +48,7 @@ export default defineComponent({
     }
 
     function handleSelectConversation(id: string) {
-      selectConversationRaw(id)
+      selectConversation(id)
       activeFeature.value = null
     }
 
@@ -62,7 +66,11 @@ export default defineComponent({
             <ConversationList
               conversations={conversations.value}
               activeConversationId={activeConversationId.value}
+              hasMore={hasMoreConversations.value}
+              loading={conversationsLoading.value}
+              error={conversationLoadError.value}
               onSelect={handleSelectConversation}
+              onLoadMore={loadMoreConversations}
             />
           ),
           default: () =>
