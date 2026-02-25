@@ -48,6 +48,8 @@ export default defineComponent({
       activeFeature.value = null
     }
 
+    const chatInputHeight = ref(0)
+
     onMounted(init)
 
     return () => (
@@ -81,6 +83,7 @@ export default defineComponent({
                   streamingContent={streamingContent.value}
                   streamingThinking={streamingThinking.value}
                   isStreaming={isStreaming.value}
+                  inputHeight={chatInputHeight.value}
                 />
                 <div class={styles.chatInputWrapper}>
                   <ChatInput
@@ -89,6 +92,7 @@ export default defineComponent({
                     disabled={isStreaming.value}
                     dropdownPlacement="top-left"
                     onSend={sendMessage}
+                    onResize={(h: number) => (chatInputHeight.value = h + 40)}
                     {...{ 'onUpdate:model': changeModel }}
                   />
                 </div>

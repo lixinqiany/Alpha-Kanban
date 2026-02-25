@@ -1,4 +1,4 @@
-import { defineComponent, ref, type PropType } from 'vue'
+import { defineComponent, nextTick, onMounted, ref, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SvgIcon from '@/components/SvgIcon'
 import Dropdown from '@/components/Dropdown'
@@ -18,20 +18,39 @@ export default defineComponent({
       default: 'bottom-right',
     },
   },
-  emits: ['send', 'update:model'],
+  emits: ['send', 'update:model', 'resize'],
   setup(props, { emit }) {
     const { t } = useI18n()
     const inputText = ref('')
+    const textareaRef = ref<HTMLTextAreaElement>()
+    const wrapperRef = ref<HTMLElement>()
+
+    const emitHeight = () => {
+      const el = wrapperRef.value
+      if (!el) return
+      emit('resize', el.offsetHeight)
+    }
+
+    const autoResize = () => {
+      const el = textareaRef.value
+      if (!el) return
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+      nextTick(emitHeight)
+    }
+
+    onMounted(emitHeight)
 
     const handleSend = () => {
       const content = inputText.value.trim()
       if (!content || props.disabled) return
       emit('send', content)
       inputText.value = ''
+      nextTick(autoResize)
     }
 
     const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
         e.preventDefault()
         handleSend()
       }
@@ -47,15 +66,19 @@ export default defineComponent({
     }
 
     return () => (
-      <div class={styles.wrapper}>
+      <div ref={wrapperRef} class={styles.wrapper}>
         <div class={[styles.inputBox, props.disabled && styles.disabled]}>
           <textarea
+            ref={textareaRef}
             class={styles.textarea}
-            rows={2}
+            rows={3}
             placeholder={t('chat.placeholder')}
             value={inputText.value}
             disabled={props.disabled}
-            onInput={(e) => (inputText.value = (e.target as HTMLTextAreaElement).value)}
+            onInput={(e) => {
+              inputText.value = (e.target as HTMLTextAreaElement).value
+              autoResize()
+            }}
             onKeydown={handleKeydown}
           />
           <div class={styles.toolbar}>

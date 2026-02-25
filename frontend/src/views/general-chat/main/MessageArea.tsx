@@ -10,6 +10,7 @@ export default defineComponent({
     streamingContent: { type: String, default: '' },
     streamingThinking: { type: String, default: '' },
     isStreaming: { type: Boolean, default: false },
+    inputHeight: { type: Number, default: 0 },
   },
   setup(props) {
     const bottomAnchorRef = ref<HTMLElement>()
@@ -20,11 +21,15 @@ export default defineComponent({
       })
     }
 
-    // 新消息到达时滚动
+    // 新消息到达或开始等待响应时滚动
     watch(() => props.messages.length, scrollToBottom)
+    watch(() => props.isStreaming, scrollToBottom)
 
     // 流式内容更新时持续滚动
     watch(() => props.streamingContent, scrollToBottom)
+
+    // 输入框高度变化时保持滚动到底部
+    watch(() => props.inputHeight, scrollToBottom)
 
     // 首次渲染滚动到底部
     onMounted(scrollToBottom)
@@ -41,15 +46,19 @@ export default defineComponent({
               />
             </div>
           ))}
-          {/* 流式中的助手消息 */}
-          {props.isStreaming && props.streamingContent && (
+          {/* 流式中的助手消息（含等待光标） */}
+          {props.isStreaming && (
             <div class={styles.messageRow}>
               <ChatMessage content={props.streamingContent} align="left" mode="flat" streaming />
             </div>
           )}
         </div>
-        {/* 底部锚点，滚动目标 */}
-        <div ref={bottomAnchorRef} class={styles.bottomAnchor} />
+        {/* 底部锚点，高度跟随输入框动态变化 */}
+        <div
+          ref={bottomAnchorRef}
+          class={styles.bottomAnchor}
+          style={{ height: props.inputHeight + 'px' }}
+        />
       </div>
     )
   },

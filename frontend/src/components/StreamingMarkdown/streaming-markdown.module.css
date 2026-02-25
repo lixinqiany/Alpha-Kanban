@@ -3,9 +3,9 @@
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   word-wrap: break-word;
-  font-size: 14px;
+  font-size: inherit;
   line-height: 1.7;
-  color: #24292f;
+  color: inherit;
 }
 
 .markdownBody p {

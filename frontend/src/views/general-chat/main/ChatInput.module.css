@@ -36,8 +36,9 @@
   border: none;
   resize: none;
   outline: none;
-  min-height: 24px;
-  max-height: 160px;
+  min-height: 63px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .textarea::placeholder {

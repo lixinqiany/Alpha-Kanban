@@ -17,8 +17,7 @@
   display: flex;
 }
 
-/* 底部锚点：为 ChatInput 留出空间，确保最后一条消息不被遮挡 */
+/* 底部锚点：高度由 inline style 动态设置，跟随输入框高度 */
 .bottomAnchor {
-  height: 140px;
   flex-shrink: 0;
 }

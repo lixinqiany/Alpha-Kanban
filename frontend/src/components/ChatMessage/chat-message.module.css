@@ -18,21 +18,19 @@
 .content {
   max-width: 100%;
   text-align: left;
+  font-size: 16px;
 }
 
 /* ── flat 模式（助手消息，无背景） ── */
 .flat .content {
   padding: 4px 0;
+  color: #24292f;
 }
 
 /* ── bubble 模式（用户消息，气泡） ── */
 .bubble .content {
   padding: 10px 16px;
-  background-color: #0969da;
-  color: #ffffff;
+  background-color: #d0e2f3;
+  color: #24292f;
   border-radius: 18px 18px 4px 18px;
-}
-
-.bubble .content :global(.markdownBody) {
-  color: #ffffff;
 }
