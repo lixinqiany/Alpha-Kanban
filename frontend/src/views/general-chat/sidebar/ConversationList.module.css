@@ -1,0 +1,42 @@
+/* ── 会话列表 ── */
+.list {
+  padding: 4px 12px;
+}
+
+.item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #24292f;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.item:hover {
+  background-color: #f6f8fa;
+  border-left-color: #0969da;
+}
+
+.active {
+  background-color: #f6f8fa;
+  border-left-color: #0969da;
+  font-weight: 600;
+}
+
+.empty {
+  padding: 16px 12px;
+  font-size: 13px;
+  color: #656d76;
+  text-align: center;
+}

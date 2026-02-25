@@ -1,25 +1,7 @@
-"""聊天模块请求/响应模型"""
-
-import uuid
-from datetime import datetime
+"""聊天模块请求模型"""
 
 from pydantic import BaseModel, Field
 
-
-# ── Conversation ──
-
-class ConversationResponse(BaseModel):
-    id: uuid.UUID
-    title: str | None
-    last_model: str
-    last_chat_time: datetime
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
-# ── Chat ──
 
 class _ChatRequestBase(BaseModel):
     """聊天请求公共字段"""

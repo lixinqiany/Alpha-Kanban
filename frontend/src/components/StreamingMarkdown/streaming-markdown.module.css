@@ -1,0 +1,152 @@
+/* ── Markdown 排版 ── */
+.markdownBody {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #24292f;
+}
+
+.markdownBody p {
+  margin: 0 0 12px;
+}
+
+.markdownBody p:last-child {
+  margin-bottom: 0;
+}
+
+.markdownBody h1,
+.markdownBody h2,
+.markdownBody h3,
+.markdownBody h4,
+.markdownBody h5,
+.markdownBody h6 {
+  margin: 16px 0 8px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdownBody h1 {
+  font-size: 1.5em;
+}
+
+.markdownBody h2 {
+  font-size: 1.3em;
+}
+
+.markdownBody h3 {
+  font-size: 1.15em;
+}
+
+.markdownBody ul,
+.markdownBody ol {
+  margin: 0 0 12px;
+  padding-left: 2em;
+}
+
+.markdownBody li + li {
+  margin-top: 4px;
+}
+
+.markdownBody blockquote {
+  margin: 0 0 12px;
+  padding: 0 1em;
+  color: #656d76;
+  border-left: 3px solid #d1d9e0;
+}
+
+.markdownBody a {
+  color: #0969da;
+  text-decoration: none;
+}
+
+.markdownBody a:hover {
+  text-decoration: underline;
+}
+
+.markdownBody code {
+  padding: 2px 6px;
+  font-size: 0.9em;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  background-color: #f6f8fa;
+  border-radius: 4px;
+}
+
+.markdownBody pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.markdownBody strong {
+  font-weight: 600;
+}
+
+.markdownBody hr {
+  height: 1px;
+  margin: 16px 0;
+  background-color: #d1d9e0;
+  border: 0;
+}
+
+/* ── 代码块 ── */
+.codeBlock {
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.5;
+  background-color: #f6f8fa;
+  border-radius: 8px;
+}
+
+/* ── 表格 ── */
+.markdownBody table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdownBody table th,
+.markdownBody table td {
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+.markdownBody table th {
+  font-weight: 600;
+  background-color: #f6f8fa;
+}
+
+.markdownBody table tr {
+  background-color: #ffffff;
+  border-top: 1px solid #d8dee4;
+}
+
+.markdownBody table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+/* ── 流式光标 ── */
+.cursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+  color: #0969da;
+  font-weight: 600;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

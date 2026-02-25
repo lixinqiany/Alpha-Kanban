@@ -28,7 +28,7 @@ const router = createRouter({
         {
           path: 'chat',
           name: 'Chat',
-          component: () => import('../views/chat/ChatView.tsx'),
+          component: () => import('../views/general-chat/GeneralChatView'),
         },
         {
           path: 'admin',

@@ -1,7 +1,4 @@
-"""聊天业务逻辑
-
-会话查询/删除 + 流式聊天编排。
-"""
+"""聊天业务逻辑 — 流式聊天编排"""
 
 import json
 import uuid
@@ -20,36 +17,7 @@ from models.model_provider_link import ModelProviderLink
 from models.provider import Provider
 from modules.llm.adapter import ChunkType, LLMConfig, LLMMessage
 from modules.llm.registry import get_adapter
-from utils.pagination import PaginatedResponse, paginate
 
-
-# ── 会话查询/删除 ──
-
-async def list_conversations(
-    session: AsyncSession,
-    user_id: uuid.UUID,
-    page: int = 1,
-    page_size: int = 10,
-) -> PaginatedResponse:
-    """按 last_chat_time 降序分页查询用户的会话列表"""
-    query = (
-        select(Conversation)
-        .where(Conversation.user_id == user_id)
-        .order_by(Conversation.last_chat_time.desc())
-    )
-    return await paginate(session, query, page, page_size)
-
-
-async def delete_conversation(
-    session: AsyncSession,
-    conversation: Conversation,
-) -> None:
-    """删除会话（级联删除消息）"""
-    await session.delete(conversation)
-    await session.commit()
-
-
-# ── 流式聊天 ──
 
 async def stream_chat(
     session: AsyncSession,
@@ -211,10 +179,7 @@ async def _resolve_model(
     session: AsyncSession,
     model_name: str,
 ) -> tuple[Model, Provider]:
-    """通过 ModelProviderLink 查找第一个启用的模型+供应商组合
-
-    TODO: 同名模型存在多个供应商时，可扩展为负载均衡策略
-    """
+    """通过 ModelProviderLink 查找第一个启用的模型+供应商组合"""
     result = await session.execute(
         select(ModelProviderLink)
         .options(
@@ -281,7 +246,6 @@ async def _generate_title(
         f"助手：{assistant_content[:500]}"
     )
     title_messages = [LLMMessage(role="user", content=prompt)]
-    # 标题生成不开 thinking，保持快速
     title_config = LLMConfig(
         api_key=config.api_key,
         base_url=config.base_url,
@@ -291,7 +255,6 @@ async def _generate_title(
         thinking_enabled=False,
     )
     response = await adapter.chat(title_messages, title_config)
-    # 清理标题：去除引号和多余空白
     title = response.content.strip().strip('"\'""''')
     return title[:200]
 

@@ -1,0 +1,38 @@
+/* ── 消息容器 ── */
+.message {
+  display: flex;
+  max-width: 760px;
+  width: 100%;
+}
+
+.alignLeft {
+  justify-content: flex-start;
+}
+
+.alignRight {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+/* ── 消息内容 ── */
+.content {
+  max-width: 100%;
+  text-align: left;
+}
+
+/* ── flat 模式（助手消息，无背景） ── */
+.flat .content {
+  padding: 4px 0;
+}
+
+/* ── bubble 模式（用户消息，气泡） ── */
+.bubble .content {
+  padding: 10px 16px;
+  background-color: #0969da;
+  color: #ffffff;
+  border-radius: 18px 18px 4px 18px;
+}
+
+.bubble .content :global(.markdownBody) {
+  color: #ffffff;
+}
