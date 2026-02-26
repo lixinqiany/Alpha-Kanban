@@ -32,6 +32,7 @@ async def api_new_chat(
             user_id=current_user.id,
             model=data.model,
             content=data.content,
+            source=data.source,
             thinking_enabled=data.thinking_enabled,
             conversation_id=None,
         ),

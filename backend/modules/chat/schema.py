@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, Field
 
+from models.conversation import ConversationSource
+
 
 class _ChatRequestBase(BaseModel):
     """聊天请求公共字段"""
@@ -12,7 +14,7 @@ class _ChatRequestBase(BaseModel):
 
 class NewChatRequest(_ChatRequestBase):
     """新会话聊天请求"""
-    pass
+    source: ConversationSource
 
 
 class ContinueChatRequest(_ChatRequestBase):

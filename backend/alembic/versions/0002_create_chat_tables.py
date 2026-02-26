@@ -20,6 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table('conversations',
         sa.Column('user_id', sa.Uuid(), nullable=False),
+        sa.Column('source', sa.String(length=30), nullable=False),
         sa.Column('title', sa.String(length=200), nullable=True),
         sa.Column('last_model', sa.String(length=100), nullable=False),
         sa.Column('last_chat_time', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

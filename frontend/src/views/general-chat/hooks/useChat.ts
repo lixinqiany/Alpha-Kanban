@@ -140,7 +140,7 @@ export function useChat(options?: UseChatOptions) {
     // 构建请求
     const isNew = activeConversationId.value === null
     const { url, body } = isNew
-      ? buildNewChatRequest(currentModel.value, content)
+      ? buildNewChatRequest(currentModel.value, content, 'general_chat')
       : buildContinueChatRequest(activeConversationId.value!, currentModel.value, content)
 
     await startSSE(url, body, {
@@ -156,6 +156,7 @@ export function useChat(options?: UseChatOptions) {
         const tempTitle = pendingUserContent.slice(0, 200)
         const newConv: Conversation = {
           id: event.conversation_id,
+          source: 'general_chat',
           title: tempTitle,
           last_model: currentModel.value!,
           last_chat_time: new Date().toISOString(),

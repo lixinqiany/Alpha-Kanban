@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 class ConversationResponse(BaseModel):
     id: uuid.UUID
+    source: str
     title: str | None
     last_model: str
     last_chat_time: datetime

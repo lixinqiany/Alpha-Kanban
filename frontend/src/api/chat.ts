@@ -2,8 +2,11 @@ import { authClient } from './client'
 
 // ── 类型定义 ──
 
+export type ConversationSource = 'general_chat'
+
 export interface Conversation {
   id: string
+  source: ConversationSource
   title: string
   last_model: string
   last_chat_time: string
@@ -70,10 +73,15 @@ export function getAvailableModels() {
 
 // ── SSE 流参数构建（交给 useSSE 发起） ──
 
-export function buildNewChatRequest(model: string, content: string, thinkingEnabled = false) {
+export function buildNewChatRequest(
+  model: string,
+  content: string,
+  source: ConversationSource,
+  thinkingEnabled = false,
+) {
   return {
     url: '/api/chat/conversations',
-    body: { model, content, thinking_enabled: thinkingEnabled },
+    body: { model, content, source, thinking_enabled: thinkingEnabled },
   }
 }
 

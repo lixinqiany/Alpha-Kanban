@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.conversation import Conversation, Message
+from models.conversation import Conversation, ConversationSource, Message
 from utils.pagination import PaginatedResponse, paginate
 
 
@@ -18,7 +18,10 @@ async def list_conversations(
     """按 last_chat_time 降序分页查询用户的会话列表"""
     query = (
         select(Conversation)
-        .where(Conversation.user_id == user_id)
+        .where(
+            Conversation.user_id == user_id,
+            Conversation.source == ConversationSource.GENERAL_CHAT.value,
+        )
         .order_by(Conversation.last_chat_time.desc())
     )
     return await paginate(session, query, page, page_size)

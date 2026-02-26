@@ -8,6 +8,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from models.base import Base
 
 
+class ConversationSource(str, Enum):
+    GENERAL_CHAT = "general_chat"
+
+
 class MessageRole(str, Enum):
     SYSTEM = "system"
     USER = "user"
@@ -28,6 +32,9 @@ class Conversation(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(), ForeignKey("users.id"), nullable=False,
+    )
+    source: Mapped[str] = mapped_column(
+        String(30), nullable=False,
     )
     title: Mapped[str | None] = mapped_column(
         String(200), nullable=True,

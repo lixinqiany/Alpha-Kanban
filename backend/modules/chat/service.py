@@ -11,7 +11,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from models.conversation import Conversation, Message, MessageRole, MessageStatus
+from models.conversation import Conversation, ConversationSource, Message, MessageRole, MessageStatus
 from models.model import Model
 from models.model_provider_link import ModelProviderLink
 from models.provider import Provider
@@ -24,6 +24,7 @@ async def stream_chat(
     user_id: uuid.UUID,
     model: str,
     content: str,
+    source: ConversationSource | None = None,
     thinking_enabled: bool = False,
     conversation_id: uuid.UUID | None = None,
 ) -> AsyncIterator[str]:
@@ -43,8 +44,11 @@ async def stream_chat(
         if conversation_id is not None:
             conversation = await _get_user_conversation(session, conversation_id, user_id)
         else:
+            if source is None:
+                raise HTTPException(status_code=400, detail="source is required for new conversations")
             conversation = Conversation(
                 user_id=user_id,
+                source=source.value,
                 title=None,
                 last_model=resolved_model.name,
             )
