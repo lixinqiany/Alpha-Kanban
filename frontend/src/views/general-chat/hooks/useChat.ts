@@ -1,4 +1,5 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useSSE } from '@/hooks/useSSE'
 import {
   listConversations,
@@ -13,12 +14,10 @@ import {
   type ChatSSEEvent,
 } from '@/api/chat'
 
-export interface UseChatOptions {
-  onConversationCreated?: (id: string) => void
-  onConversationDeleted?: () => void
-}
+export function useChat() {
+  const router = useRouter()
+  const route = useRoute()
 
-export function useChat(options?: UseChatOptions) {
   // ── 状态 ──
   const conversations = ref<Conversation[]>([])
   const activeConversationId = ref<string | null>(null)
@@ -38,11 +37,37 @@ export function useChat(options?: UseChatOptions) {
 
   const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEvent>()
 
-  // 流式过程中暂存用户首条消息内容（用于临时标题）
-  let pendingUserContent: string = ''
-
   // ── 计算属性 ──
   const currentMessages = computed(() => messages.value)
+
+  // ── 路由驱动状态 ──
+  watch(
+    () => route.params.id as string | undefined,
+    async (id) => {
+      if (id) {
+        // 如果是当前正在流式的会话（conversation_created 导致的路由切换），不中止也不重新加载
+        if (id === activeConversationId.value && isStreaming.value) {
+          return
+        }
+        // 切换到其他会话时，中止当前流
+        if (isStreaming.value) {
+          abortSSE()
+        }
+        activeConversationId.value = id
+        await loadMessages(id)
+      } else {
+        // 新对话模式
+        if (isStreaming.value) {
+          abortSSE()
+        }
+        activeConversationId.value = null
+        messages.value = []
+        streamingContent.value = ''
+        streamingThinking.value = ''
+      }
+    },
+    { immediate: true },
+  )
 
   // ── 生命周期 ──
   async function init() {
@@ -98,24 +123,26 @@ export function useChat(options?: UseChatOptions) {
     try {
       const { data } = await getConversationMessages(conversationId)
       messages.value = data
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('加载消息失败', err)
+      // 无效 ID（404）时回退到新对话
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 404) {
+        router.replace({ name: 'GeneralChat' })
+        return
+      }
       messageLoadError.value = '消息加载失败，请重试'
     }
   }
 
   // ── 操作 ──
-  async function selectConversation(id: string) {
+  function selectConversation(id: string) {
     if (id === activeConversationId.value) return
-    activeConversationId.value = id
-    await loadMessages(id)
+    router.push({ name: 'GeneralChatConversation', params: { id } })
   }
 
   function startNewChat() {
-    activeConversationId.value = null
-    messages.value = []
-    streamingContent.value = ''
-    streamingThinking.value = ''
+    router.push({ name: 'GeneralChat' })
   }
 
   async function sendMessage(content: string) {
@@ -135,8 +162,6 @@ export function useChat(options?: UseChatOptions) {
     messages.value = [...messages.value, tempUserMsg]
     streamingContent.value = ''
     streamingThinking.value = ''
-    pendingUserContent = content
-
     // 构建请求
     const isNew = activeConversationId.value === null
     const { url, body } = isNew
@@ -152,12 +177,10 @@ export function useChat(options?: UseChatOptions) {
   function handleSSEEvent(event: ChatSSEEvent) {
     switch (event.type) {
       case 'conversation_created': {
-        // 立即用用户消息内容截取前 200 字符作为临时标题
-        const tempTitle = pendingUserContent.slice(0, 200)
         const newConv: Conversation = {
           id: event.conversation_id,
           source: 'general_chat',
-          title: tempTitle,
+          title: event.title,
           last_model: currentModel.value!,
           last_chat_time: new Date().toISOString(),
           created_at: new Date().toISOString(),
@@ -165,7 +188,11 @@ export function useChat(options?: UseChatOptions) {
         }
         conversations.value = [newConv, ...conversations.value]
         activeConversationId.value = event.conversation_id
-        options?.onConversationCreated?.(event.conversation_id)
+        // 用 replace 使浏览器后退跳过空白过渡态
+        router.replace({
+          name: 'GeneralChatConversation',
+          params: { id: event.conversation_id },
+        })
         break
       }
 
@@ -195,16 +222,6 @@ export function useChat(options?: UseChatOptions) {
         break
       }
 
-      case 'title': {
-        // 用 AI 生成的标题替换临时标题
-        if (activeConversationId.value) {
-          conversations.value = conversations.value.map((c) =>
-            c.id === activeConversationId.value ? { ...c, title: event.title } : c,
-          )
-        }
-        break
-      }
-
       case 'error':
         console.error('服务端错误:', event.detail)
         streamingContent.value = ''
@@ -218,8 +235,7 @@ export function useChat(options?: UseChatOptions) {
       await apiDeleteConversation(id)
       conversations.value = conversations.value.filter((c) => c.id !== id)
       if (activeConversationId.value === id) {
-        startNewChat()
-        options?.onConversationDeleted?.()
+        router.push({ name: 'GeneralChat' })
       }
     } catch (err) {
       console.error('删除会话失败', err)

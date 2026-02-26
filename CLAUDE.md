@@ -148,12 +148,15 @@ PUT|DELETE /api/model-management/models/{model_id}
     ├── /home [HomeView]                         （Tab 切换子路由）
     │   ├── /                 OverviewContent    （默认 Tab：功能概览卡片）
     │   └── /activity         ActivityContent    （活动记录，占位中）
+    ├── /general-chat [GeneralChatView]          （AI 聊天，无组件子路由）
+    │   ├── /                 GeneralChat        （新对话：空白页 + 输入框）
+    │   └── /conversation/:id GeneralChatConversation （已有对话：消息列表 + 输入框）
     └── /admin [AdminLayout]                     （管理后台侧边栏布局）
         ├── /providers        ProviderListView   （供应商 CRUD + 分页）
         └── /models           ModelListView      （模型 CRUD + 供应商多选 + 分页）
 ```
 
-命名路由：`Login` / `Register` / `Home` / `HomeActivity` / `AdminProviderManagement` / `AdminModelManagement`
+命名路由：`Login` / `Register` / `Home` / `HomeActivity` / `GeneralChat` / `GeneralChatConversation` / `AdminProviderManagement` / `AdminModelManagement`
 
 ## Utils
 

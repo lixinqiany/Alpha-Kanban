@@ -26,9 +26,16 @@ const router = createRouter({
           children: [{ path: '', name: 'Home', component: OverviewContent }],
         },
         {
-          path: 'chat',
-          name: 'Chat',
+          path: 'general-chat',
           component: () => import('../views/general-chat/GeneralChatView'),
+          children: [
+            { path: '', name: 'GeneralChat', component: { render: () => null } },
+            {
+              path: 'conversation/:id',
+              name: 'GeneralChatConversation',
+              component: { render: () => null },
+            },
+          ],
         },
         {
           path: 'admin',

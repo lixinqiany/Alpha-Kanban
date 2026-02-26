@@ -34,11 +34,10 @@ export interface AvailableModel {
 export type AvailableModelsByManufacturer = Record<string, AvailableModel[]>
 
 export type ChatSSEEvent =
-  | { type: 'conversation_created'; conversation_id: string }
+  | { type: 'conversation_created'; conversation_id: string; title: string }
   | { type: 'thinking'; content: string }
   | { type: 'chunk'; content: string }
   | { type: 'done'; message_id: string; full_content: string; thinking: string | null }
-  | { type: 'title'; title: string }
   | { type: 'error'; detail: string }
 
 interface PaginatedResponse<T> {

@@ -49,15 +49,16 @@ async def stream_chat(
             conversation = Conversation(
                 user_id=user_id,
                 source=source.value,
-                title=None,
+                title=content[:200],
                 last_model=resolved_model.name,
             )
             session.add(conversation)
             await session.flush()
-            # 通知前端新会话 ID
+            # 通知前端新会话 ID 和标题
             yield _sse_event({
                 "type": "conversation_created",
                 "conversation_id": str(conversation.id),
+                "title": conversation.title,
             })
 
         # 3. 获取适配器
@@ -131,16 +132,6 @@ async def stream_chat(
         conversation.last_model = resolved_model.name
         conversation.last_chat_time = datetime.now(timezone.utc)
         await session.flush()
-
-        # 12. 首条消息时自动生成标题
-        if conversation.title is None:
-            try:
-                title = await _generate_title(adapter, config, content, full_content)
-                conversation.title = title
-                await session.flush()
-                yield _sse_event({"type": "title", "title": title})
-            except Exception:
-                logger.warning("自动生成会话标题失败，跳过")
 
         await session.commit()
 
@@ -235,32 +226,6 @@ async def _build_message_context(
     )
     messages = result.scalars().all()
     return [LLMMessage(role=m.role, content=m.content) for m in messages]
-
-
-async def _generate_title(
-    adapter,
-    config: LLMConfig,
-    user_content: str,
-    assistant_content: str,
-) -> str:
-    """使用 LLM 生成会话标题"""
-    prompt = (
-        "请根据以下对话内容，生成一个简短的会话标题（不超过20个字，不要加引号和标点）：\n\n"
-        f"用户：{user_content[:500]}\n"
-        f"助手：{assistant_content[:500]}"
-    )
-    title_messages = [LLMMessage(role="user", content=prompt)]
-    title_config = LLMConfig(
-        api_key=config.api_key,
-        base_url=config.base_url,
-        model=config.model,
-        temperature=config.temperature,
-        max_tokens=config.max_tokens,
-        thinking_enabled=False,
-    )
-    response = await adapter.chat(title_messages, title_config)
-    title = response.content.strip().strip('"\'""''')
-    return title[:200]
 
 
 def _sse_event(data: dict) -> str:

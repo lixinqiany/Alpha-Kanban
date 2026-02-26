@@ -1,7 +1,7 @@
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import GeneralChatLayout from '@/components/GeneralChatLayout'
 import SidebarHeader from './sidebar/SidebarHeader'
-import type { SidebarFeature } from './sidebar/SidebarHeader'
 import ConversationList from './sidebar/ConversationList'
 import MessageArea from './main/MessageArea'
 import ChatInput from './main/ChatInput'
@@ -13,7 +13,8 @@ import styles from './general-chat-view.module.css'
 export default defineComponent({
   name: 'GeneralChatView',
   setup() {
-    const activeFeature = ref<SidebarFeature | null>('newChat')
+    const route = useRoute()
+    const activeFeature = computed(() => (route.params.id ? null : 'newChat'))
 
     const {
       conversations,
@@ -29,28 +30,11 @@ export default defineComponent({
       conversationLoadError,
       init,
       selectConversation,
-      startNewChat: startNewChatRaw,
+      startNewChat,
       sendMessage,
       changeModel,
       loadMoreConversations,
-    } = useChat({
-      onConversationCreated: () => {
-        activeFeature.value = null
-      },
-      onConversationDeleted: () => {
-        activeFeature.value = 'newChat'
-      },
-    })
-
-    function handleNewChat() {
-      startNewChatRaw()
-      activeFeature.value = 'newChat'
-    }
-
-    function handleSelectConversation(id: string) {
-      selectConversation(id)
-      activeFeature.value = null
-    }
+    } = useChat()
 
     const chatInputHeight = ref(0)
 
@@ -60,7 +44,7 @@ export default defineComponent({
       <GeneralChatLayout sidebarWidth={260}>
         {{
           'sidebar-header': () => (
-            <SidebarHeader activeFeature={activeFeature.value} onNewChat={handleNewChat} />
+            <SidebarHeader activeFeature={activeFeature.value} onNewChat={startNewChat} />
           ),
           'sidebar-body': () => (
             <ConversationList
@@ -69,7 +53,7 @@ export default defineComponent({
               hasMore={hasMoreConversations.value}
               loading={conversationsLoading.value}
               error={conversationLoadError.value}
-              onSelect={handleSelectConversation}
+              onSelect={selectConversation}
               onLoadMore={loadMoreConversations}
             />
           ),

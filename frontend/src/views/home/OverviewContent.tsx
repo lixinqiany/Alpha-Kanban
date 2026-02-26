@@ -11,7 +11,7 @@ export default defineComponent({
     const { t } = useI18n()
 
     const handleChatClick = () => {
-      router.push('/chat')
+      router.push({ name: 'GeneralChat' })
     }
 
     return () => (
