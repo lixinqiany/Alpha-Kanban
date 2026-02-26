@@ -6,12 +6,13 @@ import jwt
 from config.environment import JWTConfiguration
 
 
-def create_access_token(config: JWTConfiguration, user_id: uuid.UUID, role: str) -> str:
+def create_access_token(config: JWTConfiguration, user_id: uuid.UUID, role: str, username: str) -> str:
     """生成访问令牌（短期有效）"""
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "role": role,
+        "username": username,
         "exp": now + timedelta(minutes=config["access_token_expire_minutes"]),
         "iat": now,
         "type": "access",

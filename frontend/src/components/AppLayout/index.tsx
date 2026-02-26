@@ -22,7 +22,10 @@ export default defineComponent({
     const showSidebar = ref(false)
 
     const user = getCurrentUser()
-    const initial = user?.sub?.charAt(0)?.toUpperCase() || '?'
+    if (!user) {
+      throw new Error('用户未登录，无法渲染 AppLayout')
+    }
+    const initial = Array.from(user.username)[0]?.toUpperCase() ?? '?'
 
     function handleSignOut() {
       localStorage.removeItem('access_token')
@@ -52,7 +55,7 @@ export default defineComponent({
           {/* 侧边栏抽屉 */}
           <aside class={[styles.sidebar, showSidebar.value && styles.sidebarOpen]}>
             <div class={styles.sidebarHeader}>
-              <span class={styles.sidebarUser}>{user?.sub || 'User'}</span>
+              <span class={styles.sidebarUser}>{t('nav.welcome', { name: user.username })}</span>
               <button class={styles.sidebarClose} onClick={closeSidebar}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z" />
@@ -158,7 +161,7 @@ export default defineComponent({
                   trigger: () => <button class={styles.avatarBtn}>{initial}</button>,
                   default: () => (
                     <>
-                      <div class={styles.dropdownHeader}>{user?.sub || 'User'}</div>
+                      <div class={styles.dropdownHeader}>{user.username}</div>
                       <div class={styles.dropdownDivider}></div>
                       {isAdmin() && (
                         <>

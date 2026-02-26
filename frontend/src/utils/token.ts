@@ -1,6 +1,7 @@
 interface TokenPayload {
   sub: string
   role: string
+  username: string
   exp: number
 }
 

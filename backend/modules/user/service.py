@@ -55,7 +55,7 @@ async def login_user(
         raise HTTPException(status_code=401, detail="用户名或密码错误")
 
     # 生成令牌
-    access_token = create_access_token(jwt_config, user.id, user.role)
+    access_token = create_access_token(jwt_config, user.id, user.role, user.username)
     refresh_token, jti = create_refresh_token(jwt_config, user.id)
 
     # 将 refresh token 的 jti 存入 Redis，TTL 与令牌过期时间一致
@@ -104,7 +104,7 @@ async def refresh_access_token(
     if user is None:
         raise HTTPException(status_code=401, detail="用户不存在")
 
-    access_token = create_access_token(jwt_config, user.id, user.role)
+    access_token = create_access_token(jwt_config, user.id, user.role, user.username)
     return {
         "access_token": access_token,
         "token_type": "bearer",
