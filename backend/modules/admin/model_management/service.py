@@ -8,7 +8,7 @@ from sqlalchemy.orm import joinedload
 from models.model import Model
 from models.model_provider_link import ModelProviderLink
 from models.provider import Provider
-from modules.model_management.schema import (
+from modules.admin.model_management.schema import (
     ModelCreateRequest,
     ModelUpdateRequest,
     ModelResponse,

@@ -7,8 +7,8 @@ from config.redis import redis_manager
 from config.postgres import postgres_manager
 # 注册业务路由
 from modules.user.router import router as user_router
-from modules.provider_management.router import router as provider_management_router
-from modules.model_management.router import router as model_management_router
+from modules.admin.provider_management.router import router as provider_management_router
+from modules.admin.model_management.router import router as model_management_router
 from modules.chat.router import router as chat_router
 from modules.general_chat.router import router as general_chat_router
 from modules.model.router import router as model_router

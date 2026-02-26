@@ -51,6 +51,9 @@ backend/
 ├── config/            # 配置与基础设施（环境变量、JWT、数据库连接、Redis、生命周期管理）
 ├── models/            # SQLAlchemy ORM 模型（集中管理，不放在模块内）
 ├── modules/           # 按业务域组织的功能模块
+│   ├── admin/         # 管理后台模块（需 admin 角色）
+│   │   ├── model_management/      # 模型 CRUD
+│   │   └── provider_management/   # 供应商 CRUD
 │   └── <xxx>/         # router.py / service.py / schema.py / dependencies.py（可选）
 └── utils/             # 通用工具函数
 

@@ -7,13 +7,13 @@ from loguru import logger
 from config.postgres import get_postgres_session
 from models.user import UserRole
 from modules.user.dependencies import require_roles
-from modules.provider_management.schema import (
+from modules.admin.provider_management.schema import (
     ProviderCreateRequest,
     ProviderUpdateRequest,
     ProviderResponse,
 )
 from utils.pagination import PaginatedResponse
-from modules.provider_management.service import (
+from modules.admin.provider_management.service import (
     list_providers,
     list_all_providers,
     get_provider,

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.provider import Provider
-from modules.provider_management.schema import (
+from modules.admin.provider_management.schema import (
     ProviderCreateRequest,
     ProviderUpdateRequest,
 )
