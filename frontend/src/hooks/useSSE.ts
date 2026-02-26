@@ -1,17 +1,17 @@
 import { ref, readonly } from 'vue'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 
-export interface UseSSEOptions<T> {
-  onMessage: (event: T) => void
+export interface UseSSECallbacks<TEventMap extends Record<string, unknown>> {
+  onMessage: <E extends keyof TEventMap & string>(event: E, data: TEventMap[E]) => void
   onError?: (error: Error) => void
   onComplete?: () => void
 }
 
-export function useSSE<T>() {
+export function useSSE<TEventMap extends Record<string, unknown>>() {
   const isStreaming = ref(false)
   let abortController: AbortController | null = null
 
-  async function start(url: string, body: object, options: UseSSEOptions<T>) {
+  async function start(url: string, body: object, callbacks: UseSSECallbacks<TEventMap>) {
     isStreaming.value = true
     abortController = new AbortController()
 
@@ -26,7 +26,6 @@ export function useSSE<T>() {
         },
         body: JSON.stringify(body),
         signal: abortController.signal,
-        // 不自动重连，流结束即关闭
         openWhenHidden: true,
 
         onopen: async (response) => {
@@ -37,11 +36,12 @@ export function useSSE<T>() {
         },
 
         onmessage: (ev) => {
+          if (!ev.event || !ev.data) return
           try {
-            const data = JSON.parse(ev.data) as T
-            options.onMessage(data)
-          } catch {
-            // 忽略解析失败的事件
+            const data = JSON.parse(ev.data) as TEventMap[keyof TEventMap]
+            callbacks.onMessage(ev.event as keyof TEventMap & string, data)
+          } catch (e) {
+            console.warn('[SSE] 解析失败:', ev.data, e)
           }
         },
 
@@ -51,12 +51,12 @@ export function useSSE<T>() {
         },
 
         onclose: () => {
-          options.onComplete?.()
+          callbacks.onComplete?.()
         },
       })
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
-        options.onError?.(err as Error)
+        callbacks.onError?.(err as Error)
       }
     } finally {
       isStreaming.value = false

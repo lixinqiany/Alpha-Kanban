@@ -11,8 +11,16 @@ import {
   type Conversation,
   type Message,
   type AvailableModelsByManufacturer,
-  type ChatSSEEvent,
 } from '@/api/chat'
+import {
+  ChatSSEEvent,
+  type ChatSSEEventMap,
+  type ConversationStartPayload,
+  type DeltaPayload,
+  type MessageDonePayload,
+  type ConversationDonePayload,
+  type ErrorPayload,
+} from '@/utils/chat-sse'
 
 export function useChat() {
   const router = useRouter()
@@ -35,7 +43,7 @@ export function useChat() {
   const conversationLoadError = ref<string | null>(null)
   const PAGE_SIZE = 20
 
-  const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEvent>()
+  const { isStreaming, start: startSSE, abort: abortSSE } = useSSE<ChatSSEEventMap>()
 
   // ── 计算属性 ──
   const currentMessages = computed(() => messages.value)
@@ -45,7 +53,7 @@ export function useChat() {
     () => route.params.id as string | undefined,
     async (id) => {
       if (id) {
-        // 如果是当前正在流式的会话（conversation_created 导致的路由切换），不中止也不重新加载
+        // 如果是当前正在流式的会话（conversation.start 导致的路由切换），不中止也不重新加载
         if (id === activeConversationId.value && isStreaming.value) {
           return
         }
@@ -169,50 +177,63 @@ export function useChat() {
       : buildContinueChatRequest(activeConversationId.value!, currentModel.value, content)
 
     await startSSE(url, body, {
-      onMessage: (event) => handleSSEEvent(event),
+      onMessage: (event, data) => handleSSEEvent(event, data),
       onError: (err) => console.error('SSE 错误', err),
     })
   }
 
-  function handleSSEEvent(event: ChatSSEEvent) {
-    switch (event.type) {
-      case 'conversation_created': {
-        const newConv: Conversation = {
-          id: event.conversation_id,
-          source: 'general_chat',
-          title: event.title,
-          last_model: currentModel.value!,
-          last_chat_time: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+  function handleSSEEvent<E extends keyof ChatSSEEventMap>(event: E, data: ChatSSEEventMap[E]) {
+    switch (event) {
+      case ChatSSEEvent.ConversationStart: {
+        const payload = data as ConversationStartPayload
+        if (payload.is_new) {
+          const newConv: Conversation = {
+            id: payload.conversation_id,
+            source: 'general_chat',
+            title: payload.title || '',
+            last_model: currentModel.value!,
+            last_chat_time: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+          conversations.value = [newConv, ...conversations.value]
+          activeConversationId.value = payload.conversation_id
+          // 用 replace 使浏览器后退跳过空白过渡态
+          router.replace({
+            name: 'GeneralChatConversation',
+            params: { id: payload.conversation_id },
+          })
         }
-        conversations.value = [newConv, ...conversations.value]
-        activeConversationId.value = event.conversation_id
-        // 用 replace 使浏览器后退跳过空白过渡态
-        router.replace({
-          name: 'GeneralChatConversation',
-          params: { id: event.conversation_id },
-        })
         break
       }
 
-      case 'thinking':
-        streamingThinking.value += event.content
+      case ChatSSEEvent.MessageStarted: {
+        // message_id 已在 message.done 中获取，此处可扩展
         break
+      }
 
-      case 'chunk':
-        streamingContent.value += event.content
+      case ChatSSEEvent.ThinkingDelta: {
+        const payload = data as DeltaPayload
+        streamingThinking.value += payload.delta
         break
+      }
 
-      case 'done': {
+      case ChatSSEEvent.TextDelta: {
+        const payload = data as DeltaPayload
+        streamingContent.value += payload.delta
+        break
+      }
+
+      case ChatSSEEvent.MessageDone: {
+        const payload = data as MessageDonePayload
         // 将流式消息转为正式消息
         const assistantMsg: Message = {
-          id: event.message_id,
+          id: payload.message_id,
           role: 'assistant',
-          content: event.full_content,
+          content: payload.content,
           model: currentModel.value,
           status: 'completed',
-          thinking: event.thinking,
+          thinking: payload.thinking,
           order: messages.value.length + 1,
           created_at: new Date().toISOString(),
         }
@@ -222,11 +243,20 @@ export function useChat() {
         break
       }
 
-      case 'error':
-        console.error('服务端错误:', event.detail)
+      case ChatSSEEvent.ConversationDone: {
+        // 本轮结束，usage 可选展示（当前忽略）
+        const _payload = data as ConversationDonePayload
+        void _payload
+        break
+      }
+
+      case ChatSSEEvent.Error: {
+        const payload = data as ErrorPayload
+        console.error('服务端错误:', payload.type, payload.message)
         streamingContent.value = ''
         streamingThinking.value = ''
         break
+      }
     }
   }
 

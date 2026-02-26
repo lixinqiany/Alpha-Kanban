@@ -33,13 +33,6 @@ export interface AvailableModel {
 // 按厂商分组：{ "OpenAI": [model, ...], "Anthropic": [...] }
 export type AvailableModelsByManufacturer = Record<string, AvailableModel[]>
 
-export type ChatSSEEvent =
-  | { type: 'conversation_created'; conversation_id: string; title: string }
-  | { type: 'thinking'; content: string }
-  | { type: 'chunk'; content: string }
-  | { type: 'done'; message_id: string; full_content: string; thinking: string | null }
-  | { type: 'error'; detail: string }
-
 interface PaginatedResponse<T> {
   items: T[]
   total: number

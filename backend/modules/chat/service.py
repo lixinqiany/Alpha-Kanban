@@ -1,6 +1,5 @@
 """聊天业务逻辑 — 流式聊天编排"""
 
-import json
 import uuid
 from collections.abc import AsyncIterator
 from datetime import datetime, timezone
@@ -15,6 +14,21 @@ from models.conversation import Conversation, ConversationSource, Message, Messa
 from models.model import Model
 from models.model_provider_link import ModelProviderLink
 from models.provider import Provider
+from modules.chat.events import (
+    ConversationDonePayload,
+    ConversationStartPayload,
+    DeltaPayload,
+    ErrorPayload,
+    MessageDonePayload,
+    MessageStartedPayload,
+    pack_conversation_done,
+    pack_conversation_start,
+    pack_error,
+    pack_message_done,
+    pack_message_started,
+    pack_text_delta,
+    pack_thinking_delta,
+)
 from modules.llm.adapter import ChunkType, LLMConfig, LLMMessage
 from modules.llm.registry import get_adapter
 
@@ -41,7 +55,8 @@ async def stream_chat(
         resolved_model, provider = await _resolve_model(session, model)
 
         # 2. 获取或创建会话
-        if conversation_id is not None:
+        is_new = conversation_id is None
+        if not is_new:
             conversation = await _get_user_conversation(session, conversation_id, user_id)
         else:
             if source is None:
@@ -54,12 +69,13 @@ async def stream_chat(
             )
             session.add(conversation)
             await session.flush()
-            # 通知前端新会话 ID 和标题
-            yield _sse_event({
-                "type": "conversation_created",
-                "conversation_id": str(conversation.id),
-                "title": conversation.title,
-            })
+
+        # conversation.start — 每次请求都有
+        yield pack_conversation_start(ConversationStartPayload(
+            conversation_id=str(conversation.id),
+            is_new=is_new,
+            title=conversation.title if is_new else None,
+        ))
 
         # 3. 获取适配器
         adapter = get_adapter(resolved_model.manufacturer)
@@ -92,6 +108,11 @@ async def stream_chat(
         session.add(assistant_msg)
         await session.flush()
 
+        # message.started
+        yield pack_message_started(MessageStartedPayload(
+            message_id=str(assistant_msg.id),
+        ))
+
         # 7. 构建历史消息上下文
         history = await _build_message_context(session, conversation.id)
 
@@ -110,10 +131,10 @@ async def stream_chat(
         async for chunk in adapter.stream(history, config):
             if chunk.type == ChunkType.THINKING:
                 full_thinking += chunk.content
-                yield _sse_event({"type": "thinking", "content": chunk.content})
+                yield pack_thinking_delta(DeltaPayload(delta=chunk.content))
             else:
                 full_content += chunk.content
-                yield _sse_event({"type": "chunk", "content": chunk.content})
+                yield pack_text_delta(DeltaPayload(delta=chunk.content))
 
         # 10. 完成：更新助手消息
         assistant_msg.content = full_content
@@ -121,12 +142,12 @@ async def stream_chat(
         assistant_msg.status = MessageStatus.COMPLETED.value
         await session.flush()
 
-        yield _sse_event({
-            "type": "done",
-            "message_id": str(assistant_msg.id),
-            "full_content": full_content,
-            "thinking": full_thinking or None,
-        })
+        # message.done
+        yield pack_message_done(MessageDonePayload(
+            message_id=str(assistant_msg.id),
+            content=full_content,
+            thinking=full_thinking or None,
+        ))
 
         # 11. 更新会话元数据
         conversation.last_model = resolved_model.name
@@ -134,6 +155,11 @@ async def stream_chat(
         await session.flush()
 
         await session.commit()
+
+        # conversation.done
+        yield pack_conversation_done(ConversationDonePayload(
+            conversation_id=str(conversation.id),
+        ))
 
     except Exception as e:
         logger.error("流式聊天异常: {}", str(e))
@@ -146,7 +172,23 @@ async def stream_chat(
                 await session.commit()
             except Exception:
                 logger.error("标记消息中止失败")
-        yield _sse_event({"type": "error", "detail": str(e)})
+
+        # 区分错误类型
+        error_type = "internal"
+        error_message = str(e)
+        if isinstance(e, HTTPException):
+            error_type = "request_error"
+            error_message = e.detail
+        elif "rate" in str(e).lower() or "429" in str(e):
+            error_type = "rate_limit"
+        elif "timeout" in str(e).lower():
+            error_type = "model_error"
+            error_message = "上游模型服务超时"
+
+        yield pack_error(ErrorPayload(
+            type=error_type,
+            message=error_message,
+        ))
 
 
 # ── 内部方法 ──
@@ -226,8 +268,3 @@ async def _build_message_context(
     )
     messages = result.scalars().all()
     return [LLMMessage(role=m.role, content=m.content) for m in messages]
-
-
-def _sse_event(data: dict) -> str:
-    """构建 SSE 格式事件"""
-    return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
